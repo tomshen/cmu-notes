@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Notes</title>
+    <description>Notes on classes at CMU.
+</description>
+    <link>http://www.tomshen.me/notes/</link>
+    <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 19 Feb 2015 14:34:20 -0500</pubDate>
+    <lastBuildDate>Thu, 19 Feb 2015 14:34:20 -0500</lastBuildDate>
+    <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 12: The Untyped Lambda Calculus</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\okt{\m{ok}}
+\newcommand\ok[1]{#1\;\okt}
+\def\ctx{\Gamma}
+\def\defeq{\overset{def}{=}}
+\def\succ{\m{succ}}
+\def\plus{\m{plus}}
+\def\times{\m{times}}
+\def\zero{\bar{0}}
+\def\ifz{\m{ifz}}
+\def\pred{\m{pred}}
+\newcommand\pair[2]{\langle #1, #2 \rangle}
+\def\yc{\m{Y}}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;the-untyped-lambda-calculus&quot;&gt;The Untyped $\lambda$-Calculus&lt;/h1&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;u = x \mid \lambda x . t \mid uu&lt;/script&gt;
+
+&lt;p&gt;Since this is untyped, $\ok{u}$ and&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ok{u} \in \ctx}
+{\Gamma \vdash \ok{u}}
+&lt;/script&gt;
+
+&lt;p&gt;We have the rules you’d expect for the $\okt$ judgement, and for equivalence. &lt;em&gt;[They were illegible. See PFPL 17.1]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;church-encoding&quot;&gt;Church encoding&lt;/h2&gt;
+&lt;p&gt;Church numerals are (the best-known) special case of Church encoding. We will use $\bar{0}$ to represent numbers in the language, rather than the real world.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{0} \defeq \lambda b . \lambda s . b&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{1} \equiv \lambda b . \lambda s . s(b)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\overline{n + 1} \defeq \lambda b . \lambda s . s(\bar{n} \; b \; s)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\succ \defeq \lambda f . \lambda b . \lambda s . s(f \; b \; s)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\succ&#39; \defeq \lambda f . \lambda b . \lambda s . f(s \; b) s&lt;/script&gt;
+
+&lt;p&gt;We can prove, for any $n \in \mathbb{N}$, &lt;script type=&quot;math/tex&quot;&gt;\succ(\bar{n}) \equiv \succ&#39;(\bar{n}) \equiv \overline{n+1}&lt;/script&gt; by induction on $n$.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\plus &amp; = \lambda m . \lambda n . \lambda b . \lambda s . n \; (m \; b \; s) \; s \\
+&amp; = \lambda m . \lambda n . m \; n \; \succ \\
+\times &amp; = \lambda m . \lambda n . m \; \zero \; (\plus n)
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;To define $\ifz$, we need to be able to find the predecessor of something:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ifz\{e, e_0, x. e_s\} = e \; e_0 \; (\lambda \_ . [\pred \; e / x] e_s)&lt;/script&gt;
+
+&lt;p&gt;We define $\pred$ as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\pred(\zero) &amp; \equiv \zero \\
+\pred(\overline{n+1}) &amp; \equiv \bar{n}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Returning to Church encodings, we need to represent numbers as their iterators. This is necessary to be able to obtain the predecessor of a value. First, we define pairs&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\pair{u_1}{u_2} &amp; \defeq \lambda f . f \; u_1 \; u_2 \\
+u \cdot l &amp; \defeq u \; (\lambda x . \lambda y . x) \\
+u \cdot r &amp; \defeq u \; (\lambda x . \lambda y . y)
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\pred&#39; &amp; = \lambda n . n \; \pair{\zero}{\zero} \; (\lambda p . \pair{p \cdot r}{\succ \; (p \cdot r)}) \\
+\pred &amp; = \lambda n . \pred&#39; \; (n) \cdot l
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;To implement $\m{fix}$, we define the $\yc$ combinator.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\yc \defeq \lambda f . (\lambda x . f \; (x \; x)) \; (\lambda x . f \; (x \; x))&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\yc \; F &amp; \equiv (\lambda x . F \; (x \; x)) \; (\lambda x . F \; (x \; x)) \\
+&amp; \equiv F \; ((\lambda x . F \; (x \; x)) \; (\lambda x . F \; (x \; x))) \\
+&amp; \equiv F \; (\lambda f . (\lambda x . f \; (x \; x)) (\lambda x . f \; (x \; x))) \; F \\
+&amp; \equiv F \; (\yc \; F)
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Thus, we have all the computational power of PCF (and computation in general) in a much more compact language.&lt;/p&gt;
+
+&lt;h2 id=&quot;scotts-theorem&quot;&gt;Scott’s Theorem&lt;/h2&gt;
+&lt;p&gt;There exists no effectively computable (computable in the $\lambda$-calculus) algorithm for testing the equivalence of two lambda terms.&lt;/p&gt;
+
+&lt;p&gt;Scott’s Theorem is a special case of &lt;em&gt;Rice’s Theorem&lt;/em&gt;, which states that there exists no effective computable algorithm that can test any (nontrivial, behavioral) property of lambda terms.&lt;/p&gt;
+
+&lt;p&gt;A property $A$ is &lt;em&gt;trivial&lt;/em&gt; if $\forall u . A(u)$ or $\forall u . \neg A(u)$.&lt;/p&gt;
+
+&lt;p&gt;A property $A$ is &lt;em&gt;behavioral&lt;/em&gt; if $u \equiv u’ \supset A(u) \iff A(u’)$.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 19 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/19/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/19/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 11: Dynamic Languages as Typed Languages</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ok{\m{ok}}
+\def\num{\m{num}}
+\def\fun{\m{fun}}
+\def\dyn{\m{dyn}}
+\def\nat{\m{nat}}
+\def\new{\m{new}}
+\def\cast{\m{cast}}
+\def\err{\m{ err}}
+\def\inst{\m{inst}}
+\def\bool{\m{bool}}
+\def\true{\m{true}}
+\def\false{\m{false}}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;dpcf-continued&quot;&gt;DPCF (continued)&lt;/h1&gt;
+&lt;p&gt;Recall that DPCF is “dynamic PCF” (looks like PCF without types). There are two classes of values:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;numbers $\num[n]$, where $\num$ is a class of numbers&lt;/li&gt;
+  &lt;li&gt;functions $\fun(x.d)$, where $\fun$ is a class of functions&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Recall that classes are not types. So, the classes are $\num$ and $\fun$, but both their types are $\ok$. So, while dynamic languages are often said to have “runtime type checking,” this is not quite correct. What we actually have is runtime &lt;em&gt;class&lt;/em&gt; checking:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$d \m{ is_num } n$.&lt;/li&gt;
+  &lt;li&gt;$d \m{ is_fun } x.d’$.&lt;/li&gt;
+  &lt;li&gt;$d \m{ isnt_num}$.&lt;/li&gt;
+  &lt;li&gt;$d \m{ isnt_fun}$.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;which requires space, requires time, and can fail.&lt;/p&gt;
+
+&lt;h1 id=&quot;hybrid-pcf&quot;&gt;Hybrid PCF&lt;/h1&gt;
+&lt;p&gt;We can define a hybrid PCF as PCF $+$ $\dyn$, which is a subset of $FPC$ with recursive types. This lets us have “dynamic” typing while still being able to perform program transformations.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \nat \mid \tau_1 \rightharpoonup \tau_2 \mid \dyn&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\new[c](e) : \dyn \m{ if } \begin{cases}
+e : \nat &amp; \m{if } c = \num \\
+e : \dyn \rightharpoonup \dyn &amp; \m{if } c= \fun
+\end{cases} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\new[\num](7) : \dyn&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\num[\fun](7)\;X&lt;/script&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\cast[c](e) : \begin{cases}
+\nat &amp; \m{if } c = \num \\
+\dyn \rightharpoonup \dyn &amp; \m{if } c = \fun
+\end{cases} \text{ where $e : \dyn$} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\cast[\fun](\new[\num](\_))\err&lt;/script&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inst[c](e) : \bool \text{ where $e : \dyn$}&lt;/script&gt;
+
+&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\inst[\num](\new[\num](\_)) = \true&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that if&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1 : \ok, \ldots, x_n : \ok \vdash_{DPCF} d : \ok&lt;/script&gt;
+
+&lt;p&gt;then&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1 : \dyn,\ldots,x_n : \dyn \vdash_{HPCF} d^+ : \dyn&lt;/script&gt;
+
+&lt;p&gt;and the behavior is preserved.&lt;/p&gt;
+
+&lt;p&gt;Ultimately, it makes much more sense to use a static language with type inference than a dynamic language. In either case, you can write code without explicit types. But with the static language, the compiler can perform transformations and guarantee (useful) type safety.&lt;/p&gt;
+
+&lt;h1 id=&quot;dpcf-subseteq-hpcf-subseteq-fpc&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;DPCF \subseteq HPCF \subseteq FPC&lt;/script&gt;&lt;/h1&gt;
+&lt;p&gt;(dynamic typing $\subseteq$ static typing $\subseteq$ FPC)&lt;/p&gt;
+
+&lt;p&gt;Dynamic typing is not in opposition to static typing, because it is a subset of static typing. However, HPCF is an entirely artificial construct. It’s simply a way to show the power of FPC. FPC has many other useful features.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;FPC = \lambda \{ 0 ~ 1 + \times \to \mu \}&lt;/script&gt;
+</description>
+        <pubDate>Tue, 17 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/17/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/17/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 10: Dynamic Languages</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ok{\m{ok}}
+
+$
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;dynamic-languages&quot;&gt;Dynamic Languages&lt;/h1&gt;
+
+&lt;h2 id=&quot;dynamic-vs-static-typinglanguages&quot;&gt;Dynamic vs Static Typing/Languages&lt;/h2&gt;
+
+&lt;h3 id=&quot;static-languages&quot;&gt;Static languages&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;ML&lt;/li&gt;
+  &lt;li&gt;Haskell&lt;/li&gt;
+  &lt;li&gt;Java&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;dynamic-languages-1&quot;&gt;Dynamic languages&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Lisp (1960)
+    &lt;ul&gt;
+      &lt;li&gt;The original dynamic language&lt;/li&gt;
+      &lt;li&gt;Racket/Scheme&lt;/li&gt;
+      &lt;li&gt;Clojure&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Python&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;erroneous-ideas&quot;&gt;Erroneous ideas&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;interactive $\iff$ dynamic: There’s no coupling between interactive and dynamic languages. For instance, ML has a REPL, but is still a static language.&lt;/li&gt;
+  &lt;li&gt;Bellman effect: Richard Bellman gave &lt;em&gt;dynamic&lt;/em&gt; programming its name because he though “dynamic” sounded good. Just because something is “dynamic” doesn’t mean it’s better.&lt;/li&gt;
+  &lt;li&gt;Anti-types: Types are an obstacle.&lt;/li&gt;
+  &lt;li&gt;heterogeneity: &lt;code&gt;[1, I, &quot;one&quot;]&lt;/code&gt; is ill-typed in ML. This is held up as an example of the limitations of static typing.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;technical-issues&quot;&gt;Technical issues&lt;/h3&gt;
+&lt;p&gt;Dynamic languages are not opposed to static languages because dynamic languages $\subseteq$ static languages.&lt;/p&gt;
+
+&lt;p&gt;The crucial idea is that untyped languages are &lt;em&gt;uni&lt;/em&gt;typed languages $\approx$ dynamic languages. A dynamic language restricts attention to a &lt;em&gt;single type&lt;/em&gt;. Bob Harper (unsurprisingly) thinks this is a bad idea.&lt;/p&gt;
+
+&lt;p&gt;Surface syntax can be very deceiving. What &lt;code&gt;2 + 3&lt;/code&gt; means in ML is dramatically different from &lt;code&gt;2 + 3&lt;/code&gt; in Python or &lt;code&gt;+ 2 3&lt;/code&gt; in Lisp.&lt;/p&gt;
+
+&lt;h2 id=&quot;dynamic-pcf-dpcf&quot;&gt;Dynamic PCF (DPCF)&lt;/h2&gt;
+&lt;p&gt;It looks like we simply erased type information from programs.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+d &amp; ::= x \\
+&amp; |\; \m{num}[n] \\
+&amp; |\; \m{zero} \\
+&amp; |\; \m{succ}(d) \\
+&amp; |\; \m{ifz}(d, d_0, x.d_1) \\
+&amp; |\; \m{fun}(x.d) &amp; \lambda x.d \\
+&amp; |\; \m{app}(d_1; d_2) &amp; d_1(d_2 )\\
+&amp; |\; \m{fix}(y.d) &amp; \m{fix } x \m{ is } d
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;So, it seems like PCF $=$ DPCF $+$ types.&lt;/p&gt;
+
+&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
+&lt;p&gt;The statics are a little different. Consider&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1\m{ ok},\ldots,x_n\m{ ok} \vdash d\m{ ok}&lt;/script&gt;
+
+&lt;p&gt;which could be written as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1:\m{ok},\ldots,x_n:\m{ok} \vdash d:\m{ok}&lt;/script&gt;
+
+&lt;p&gt;thus making $\m{ok}$ the one true type, thereby showing untyped DPCF is the same as unityped DPCF. This means that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{\Gamma,x : \ok \vdash d : \ok}
+{\Gamma \vdash \lambda x.d : \ok}&lt;/script&gt;
+
+&lt;p&gt;Similarly, $\m{zero}(\m{zero}) : \ok$. This is rather unsettling.&lt;/p&gt;
+
+&lt;p&gt;$\m{zero}(\m{zero})$ will fail at runtime instead of at compile time.&lt;/p&gt;
+
+&lt;h3 id=&quot;dynamics&quot;&gt;Dynamics&lt;/h3&gt;
+&lt;p&gt;The dynamics are &lt;em&gt;quite&lt;/em&gt; different. We have our usual&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{cases}
+d \m{ val} \\
+d \mapsto d&#39;
+\end{cases}&lt;/script&gt;
+
+&lt;p&gt;but we also need runtime class checks:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{cases}
+d \m{ err} \\
+d \m{ is_name} \\
+d \m{ isnt_num} \\
+d \m{ is_fun} \\
+d \m{ isnt_fun}
+\end{cases}&lt;/script&gt;
+
+&lt;p&gt;We’ll need to include these in dynamics, as well as propagate any errors that come up. We’ll need the basic rules:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
+{\lambda x.d \;\m{is_fun}\; y.d}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
+{\m{num}[\_] \;\m{isnt_fun}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
+{\m{zero} \mapsto \m{num}[0]}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{d\;\m{val} \;\; d \;\m{is_num}\; n}
+{\m{succ}(d) \mapsto \m{num}[n+1]}&lt;/script&gt;
+
+&lt;p&gt;(This is why we needed to include $\m{num}[n]$ in our language.)&lt;/p&gt;
+
+&lt;p&gt;Thus, when we compile down to machine code, we’ll need to store type information as well. This costs space (to store types) and time (to check types).&lt;/p&gt;
+
+&lt;p&gt;In ML, &lt;code&gt;2 + 3&lt;/code&gt; compiles down to a register holding &lt;code&gt;2&lt;/code&gt;, a register holding &lt;code&gt;3&lt;/code&gt;, and an adding operation. In a DPCF, &lt;code&gt;2 + 3&lt;/code&gt; compiles down to memory holding &lt;code&gt;num&lt;/code&gt; and &lt;code&gt;2&lt;/code&gt;, memory holding &lt;code&gt;num&lt;/code&gt; and &lt;code&gt;3&lt;/code&gt;, and operations to not just add &lt;code&gt;2&lt;/code&gt; and &lt;code&gt;3&lt;/code&gt;, but check the two types are the same and store that type with &lt;code&gt;5&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The formalisms behind a dynamic language &lt;em&gt;force&lt;/em&gt; a less efficient implementation. And, this overhead (which is already substantial for such a simple language) increases even more as the language becomes more complex.&lt;/p&gt;
+
+&lt;h3 id=&quot;type-safety&quot;&gt;Type safety&lt;/h3&gt;
+&lt;p&gt;One of the oft-touted benefits of dynamic languages is that your program will never fail to compile due to type checking.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Aside: ML’s error messages are terrible because it sets up a set of simultaneous equations and attempts to solve them with a system similar to Gaussian elimination. There’s no easy way to turn that into a good error message.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; DPCF is type-safe.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Proof.&lt;/em&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Preservation: trivial, since $d : \ok \mapsto d’ : \ok$ (“anything goes”)&lt;/li&gt;
+  &lt;li&gt;Progress: if $d : \ok$, then either
+    &lt;ul&gt;
+      &lt;li&gt;$d \m{ val}$&lt;/li&gt;
+      &lt;li&gt;$d \m{ err}$&lt;/li&gt;
+      &lt;li&gt;$\exists d’ : \ok . d \mapsto d’$&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\square&lt;/script&gt;
+
+&lt;h3 id=&quot;addition-in-dpcf&quot;&gt;Addition in DPCF&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+x + 0 &amp; = x \\
+x + (\m{succ}(y)) &amp; = \m{succ}(x+y)
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{fun}(x . \m{fix} (p . \m{fun} (y . \m{ifz} (y;x;y&#39;. \m{succ}(\m{app}(p; y&#39;))))))&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\lambda(x) . \m{fix} \;p \m{ is } \lambda(y) \m{ifz} \{ \m{zero} \hookrightarrow x \;|\; \m{succ}(y&#39;) \hookrightarrow \m{succ}(p(y&#39;)) \}&lt;/script&gt;
+
+&lt;p&gt;Despite looking a lot like addition would in PCF,&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;We have to check $\m{is_fun}\;p$ every recursive call of $p$ despite the fact that $p$ cannot be anything but a function. If we allowed unchecked function calls here, we’d have to allow it in situations where it would not be appropriate, like $\lambda f . f(\m{zero})$.&lt;/li&gt;
+  &lt;li&gt;We have to check $\m{is_num}\; p(y’)$ every recursive call for $\m{succ}$.&lt;/li&gt;
+  &lt;li&gt;We have to check $\m{is_num}\; y$ every recursive call for $\m{ifz}$.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Thus, this will be a lot slower than the same function in PCF.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Aside: If you wrote $\m{add}$ as a multi-argument function, we’re already introducing typing in the form of light pattern matching, since $\lambda(x,y)$ takes in $\langle \ok, \ok \rangle$ as an argument.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;Structural operational semantics and type systems are extremely useful for understanding programming languages, especially when coupled with machine-checked proofs (e.g. Twelf).&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Aside: A machine-checked proof ($\approx$ 30k lines of Twelf) was written in a couple weeks that proves the type safety of Standard ML.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It’s far too complicated to prove the type safety of dynamic languages.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 12 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/12/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/12/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 9: Recursive Types, Objects and Dynamic Dispatch</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$
+\def\self{\sf self\;}
+\def\unroll{\sf unroll\;}
+\def\fold{\sf fold\;}
+\def\unfold{\sf unfold\;}
+\def\fix{\sf fix\;}
+\def\real{\sf real\;}
+\def\bar{\;|\;}
+\def\cart{\sf cart}
+\def\polar{\sf polar}
+\def\dist{\sf dist}
+\def\quadrant{\sf quadrant}
+\def\obj{\sf obj}
+\def\new{\sf new}
+\def\this{\sf this}
+\def\case{\sf case}
+$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;pcf-continued&quot;&gt;PCF (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;recursive-types-continued&quot;&gt;Recursive Types (continued)&lt;/h2&gt;
+
+&lt;h3 id=&quot;self-reference&quot;&gt;Self-reference&lt;/h3&gt;
+&lt;p&gt;Imagine we want to extend the language with a new feature:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+\begin{align*}
+\tau ::= &amp; \cdots \bar \self(\tau) \\
+e ::= &amp; \cdots \bar \self[\tau](x.e) \bar unroll(e)
+\end{align*}
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where the first expression is into, and the second elim.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+\frac
+{\Gamma, x : \self(\tau) \vdash : \tau}
+{\Gamma \vdash \self[\tau](x.e) : \self(\tau)}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+\frac
+{\Gamma \vdash e : \self(\tau)}
+{\Gamma \vdash \unroll(e) : \tau}
+&lt;/script&gt;
+
+&lt;p&gt;Actually, we can implement $\self$ and $\unroll$ with existing language constructs:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\self(\tau) &amp; \overset{def}{=} \mu\alpha.\alpha \to \tau \\
+\self[\tau](x.e) &amp; \overset{def}{=} \fold[\alpha.\alpha \to \tau](\lambda x : \self(\tau).e) \\
+\unroll(e) &amp; \overset{def}{=} \unfold(e)(e)
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Note that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\fix[\tau](x.e) &amp; = \unroll(\self[\tau](y [\unroll y / x]\; e)) \\
+&amp; \overset{*}{\mapsto} [\self[\tau](y [\unroll y / x]\; e) / y][\unroll y / x]\; e \\
+&amp; = [\unroll (\self(y [\unroll y / x]\; e)) / x]\; e \\
+&amp; = [\fix (x.e) / x]\; e
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;In Java and C++ (and similar languages), self-references (e.g. &lt;code&gt;this&lt;/code&gt;) are implemented this way.&lt;/p&gt;
+
+&lt;h1 id=&quot;dynamic-dispatch&quot;&gt;Dynamic Dispatch&lt;/h1&gt;
+&lt;p&gt;This is how we’re doing &lt;em&gt;object-oriented&lt;/em&gt; programming.&lt;/p&gt;
+
+&lt;h2 id=&quot;notation&quot;&gt;Notation&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle e_1, e_2 \rangle, e \cdot l, e \cdot r&lt;/script&gt;
+
+&lt;p&gt;is generalized to&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle l \hookrightarrow e_1, r \hookrightarrow e_2\rangle &lt;/script&gt;
+
+&lt;p&gt;is further generalized to (arbitrary labels)&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle x \hookrightarrow e_1, y \hookrightarrow e_2\rangle &lt;/script&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A class is a particular implementation of an abstract type
+    &lt;ul&gt;
+      &lt;li&gt;A class is &lt;em&gt;code&lt;/em&gt;. A class is &lt;strong&gt;not a type&lt;/strong&gt;.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;An instance is a particular such particular \this&lt;/li&gt;
+  &lt;li&gt;Instance data is the data associated with an instance.&lt;/li&gt;
+  &lt;li&gt;An instance type is the type of the instance data, such as $\langle x \hookrightarrow \real, y \hookrightarrow \real \rangle$.&lt;/li&gt;
+  &lt;li&gt;A method is a function on class values&lt;/li&gt;
+  &lt;li&gt;Dispatch is applying a method to an instance&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We define a &lt;em&gt;dispatch matrix&lt;/em&gt;. Let $C$ be the set of classes, and $D$ the set of methods. For every type $\tau$, let $\tau^c$ be the type of $c$’s instance data. Let $\rho_d$ be the type of $d$’s result.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+\prod_{c \in C} \prod_{d \in D} \tau^c \to \rho_d
+&lt;/script&gt;
+
+&lt;h2 id=&quot;example-cartesian-and-polar-points&quot;&gt;Example: Cartesian and Polar Points&lt;/h2&gt;
+
+&lt;p&gt;Let $C = \{\cart, \polar\}$ and $D = \{\dist, \quadrant \}$. Then,&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e^{\cart}_{\dist} = \lambda u : \tau^{\cart} . \sqrt{(u \cdot x)^2 + (u \cdot y)^2}&lt;/script&gt;
+
+&lt;p&gt;We introduce $\obj$, with intro form &lt;script type=&quot;math/tex&quot;&gt;\new[c](e)&lt;/script&gt; and elimination form $e \Leftarrow d$.&lt;/p&gt;
+
+&lt;h2 id=&quot;class-based-organization&quot;&gt;Class-based organization&lt;/h2&gt;
+&lt;p&gt;We have a class vector ($cv$):&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\prod_{c \in C} \tau^c \to \prod_{d \in D} \rho_d&lt;/script&gt;
+
+&lt;p&gt;$\prod_{d \in D} \rho_d$ is the object (\obj).&lt;/p&gt;
+
+&lt;p&gt;Given a class and instance data, return all the methods.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \Leftarrow d \overset{def}{=} e \cdot d&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e^c \overset{def}{=} \lambda u : \tau^c . \langle e_{dm} \cdot c \cdot d(u) \rangle_{d \in D}&lt;/script&gt;
+
+&lt;p&gt;where $dm$ refers to the dispatch matrix.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_{cv} = \langle e \hookrightarrow e^c \rangle_{c \in C}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\new[c](e) = e_{cv} \cdot c(e)&lt;/script&gt;
+
+&lt;h2 id=&quot;method-based-organization&quot;&gt;Method-based organization&lt;/h2&gt;
+&lt;p&gt;We have a method vector ($mv$):&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\prod_{d \in D} \sum_{c \in C} \tau^c \to \rho_d&lt;/script&gt;
+
+&lt;p&gt;$\sum_{c \in C} \tau^c$ is the object.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\new[c](e) \overset{def}{=} c \cdot e&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_d = \lambda \this . (\sum_{c \in C} \tau^c).\case \this \\{
+c \cdot u \Rightarrow e_{dm} \cdot c \cdot d(u) \\} &lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_{mv} \overset{def}{=} \langle d \hookrightarrow e_d \rangle_{d \in D}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \Rightarrow d \overset{def}{=} e_{mv} \cdot d(e)&lt;/script&gt;
+
+&lt;p&gt;This approach is called “multimethod,” and is used in Cecil and Diesel.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 10 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/10/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/10/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>76-221 Class 9: As You Like It</title>
+        <description>&lt;h1 id=&quot;the-odyssey-and-as-you-like-it&quot;&gt;The &lt;em&gt;Odyssey&lt;/em&gt; and &lt;em&gt;As You Like It&lt;/em&gt;&lt;/h1&gt;
+&lt;p&gt;The &lt;em&gt;Odyssey&lt;/em&gt; says that to be a person is to contribute to culture and society, to civilization. It holds civilization about nature.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;AYLI&lt;/em&gt;, on the other hand, presents nature (at first glance) as morally superior to civilization. It asks in response to the &lt;em&gt;Odyssey&lt;/em&gt;, “What if civilization is corrupt?” and “What are civilization and nature, anyway?”&lt;/p&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;3.2.5&lt;/h1&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;these trees shall be my books&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;As Orlando nails his poetry to trees in the forest, he is, in some sense, civilizing nature.&lt;/p&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;2.4.22-40&lt;/h1&gt;
+&lt;p&gt;According to Silvus, love is when one is driven to crazy actions. This is exemplified by Orlando, Rosalind, etc.&lt;/p&gt;
+
+&lt;h1 id=&quot;section-2&quot;&gt;2.4.40&lt;/h1&gt;
+&lt;p&gt;Consider how different seeing a play and reading a play is, and the cues a performance must take from the text. For instance, the line “Oh Phoebe Phoebe Phoebe” could be &lt;em&gt;incorrectly&lt;/em&gt; delivered as sad and anguished, but given the context, should be delivered with fake spontaneity and excitement.&lt;/p&gt;
+
+&lt;h1 id=&quot;section-3&quot;&gt;3.2.13-21&lt;/h1&gt;
+&lt;p&gt;The entire monologue is in one sense mocking the life of shepherd, but ultimately is saying how a shepherd’s life is not one for a fool.&lt;/p&gt;
+
+&lt;h1 id=&quot;section-4&quot;&gt;3.2.356-66&lt;/h1&gt;
+&lt;p&gt;You have to perform being in love to truly be in love. For instance, flowers and the spectacle of Valentine’s Day.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 10 Feb 2015 09:00:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/10/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/10/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 8: PCF</title>
+        <description>&lt;h1 id=&quot;pcf-partial-computable-functions&quot;&gt;PCF (Partial Computable Functions)&lt;/h1&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \textsf{nat} \;|\; \tau \rightharpoonup \tau \\
+e &amp; ::= x \;|\; z \;|\; s(e) \;|\; \lambda x : \tau . e \;|\; ee \;|\; \textsf{ifz}e,e_0,x.e_1) \;|\; \textsf{fix}[\tau](x.e)
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;[missing]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;fixed-point&quot;&gt;Fixed Point&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;Fe \cong e&lt;/script&gt;
+
+&lt;h2 id=&quot;definability&quot;&gt;Definability&lt;/h2&gt;
+&lt;p&gt;$f$ is definable if there exists some $e_f$ such that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f(n) = m \iff e_f(\bar{n}) \equiv \bar{m} : \textsf{nat}&lt;/script&gt;
+
+&lt;h2 id=&quot;universal-function&quot;&gt;Universal Function&lt;/h2&gt;
+&lt;p&gt;We can now have infinite loops through recursion:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_D \equiv s(e_D) : \textsf{nat}&lt;/script&gt;
+
+&lt;p&gt;This means we can implement a universal function (recall that we couldn’t in Gödel’s T).&lt;/p&gt;
+
+&lt;p&gt;The class of partial computable functions are exactly those in PCF. PCF is known as the &lt;em&gt;E. coli&lt;/em&gt; of programming languages, because its constructs show in up in many, many other programming languages.&lt;/p&gt;
+
+&lt;h2 id=&quot;conservative-extensions&quot;&gt;Conservative Extensions&lt;/h2&gt;
+&lt;p&gt;Conservative extensions leave the pre-existing constructs alone. For instance, adding products and sums to $\mathcal{L}(\textsf{num}\;\textsf{str})$ did not disturb existing semantics; it just added more of them. Adding recursion is not a conservative extension, because it changes the existing language. This is why you can’t just dump your favorite features from several different languages into one, and expect the new language to work well.&lt;/p&gt;
+
+&lt;h2 id=&quot;datatypes&quot;&gt;Datatypes&lt;/h2&gt;
+&lt;p&gt;$\textsf{nat}$ is no longer a primitive type, but a definable type.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\textsf{datatype}\;\textsf{exp} &amp; = \textsf{Var of variable} \\
+&amp; \;|\; \textsf{Lam} \textsf{ of } \textsf{exp} * (\textsf{variable} * \textsf{exp})\\
+&amp; \;|\; \textsf{App of } \textsf{exp} * \textsf{exp} \\
+&amp; \;|\; \textsf{Unit of unit} \\\\
+
+\textsf{datatype}\;\textsf{nat} &amp; = Z \;|\; S \textsf{ of } \textsf{nat} \\
+
+\textsf{nat} &amp; \cong \textsf{unit} + \textsf{nat}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;recursive-types&quot;&gt;Recursive Types&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \cdots \;|\; \mu \alpha.\tau | \alpha&lt;/script&gt;
+
+&lt;p&gt;Now we can have “bad” types: in $\lambda x.\alpha \ldots$, $\alpha$ is an unbound type. Thus, we need typing semantics:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\tau \textsf{ type}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\textsf{unit} \textsf{ type}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\tau_1 \textsf{ type} \;\;\;\; \tau_2 \textsf{ type}}
+{\tau_1 \rightharpoonup \tau_2 \textsf{ type}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\alpha \;|\; \alpha \textsf{ type} \vdash \tau \textsf{ type}}
+{\mu\alpha.\tau \textsf{ type}}&lt;/script&gt;
+
+&lt;p&gt;which is the same as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma, \alpha \textsf{ type} \;\;\;\; \Gamma, \tau \textsf{ type}}
+{\Gamma \vdash \mu\alpha.\tau \textsf{ type}}&lt;/script&gt;
+
+&lt;p&gt;All types we can write are closed. They can have bound variables, but no free variables.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\mu\alpha.\tau \cong [\mu\alpha.\tau \;/\; \alpha]\; \tau&lt;/script&gt;
+
+&lt;p&gt;We can define type equivalence in terms of $\equiv$ (equi-recursive types), or $\rightleftarrows$ (iso-recursive types / isomorphic). We choose to define types in terms of iso-recursive types, because it’s more straightforward. This is also how ML does it.&lt;/p&gt;
+
+&lt;p&gt;There are two operations that mediate this isomorphism:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \;|\; \textsf{unfold}(e) \;|\; \textsf{fold}(e)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \mu\alpha.\tau}
+{\Gamma \vdash \textsf{unfold}(e) : [\mu\alpha . \tau \;/\; \alpha]\; \tau}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : [\mu\alpha . \tau \;/\; \alpha]\; \tau}
+{\Gamma \vdash \textsf{fold}(e) : \mu\alpha.\tau}&lt;/script&gt;
+
+&lt;p&gt;We need to add the type we expect to obtain from folding to $\textsf{fold}$ to make the typing rules unambiguous:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \;|\; \textsf{unfold}(e) \;|\; \textsf{fold}[\alpha . \tau](e)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : [\mu\alpha . \tau \;/\; \alpha]\; \tau}
+{\Gamma \vdash \textsf{fold}[\alpha . \tau](e) : \mu\alpha.\tau}&lt;/script&gt;
+
+&lt;p&gt;We can do programming in this language! We apparently don’t have recursion at first glance, but recursive types are actually a conservative extension that will let us do recursion.&lt;/p&gt;
+
+&lt;h3 id=&quot;values-of-mu-alpha--tau&quot;&gt;Values of $\mu \alpha . \tau$&lt;/h3&gt;
+</description>
+        <pubDate>Thu, 05 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/05/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/05/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>76-221 Class 8: As You Like It</title>
+        <description>&lt;p&gt;Since we didn’t have class, the professor, Alan Kennedy, posted some notes:&lt;/p&gt;
+
+&lt;h1 id=&quot;where-we-left-off&quot;&gt;Where We Left Off&lt;/h1&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;At the end of last class we were discussing Jaques’ speech about all the world being a stage. We were in the process of dismantling his speech, recognizing that it may be nothing more than a filler while waiting for the return of Orlando with Adam. The negative view of the world that the speech offers is in fact countered by the very positive, generous act of helping an old man. None of Jaques’ stages encounter this kind of selfless act. The speech seems to suggest that there is no variation possible, that the system of 7 ages is rigid and fixed for everybody. Note that none of the characters on stage react to his speech, neither approving it or disapproving. It just runs past them. We left off with the idea that we might look for more flexible ideas of time in the rest of the play. To that end we already have the comments of Touchstone when he pulls out his watch and notes that the world wags on from hour to hour. That too seems a foolish, or perhaps comic or satirical speech. The response to such a speech might be:  Of course. We have also noted that in the Forest of Arden the exiles ‘fleet the time carelessly’, which seems to say that there are different kinds of time, or at least different ways of experiencing it.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;whats-jaques-story&quot;&gt;What’s Jaques’ Story?&lt;/h1&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;We read his speech and found it wanting. In what ways? It seemed altogether too negative we said. It looked like filler between Orlando’s leaving and his return with Adam. Orlando’s generosity seemed in direct contradiction to the nihilism of the speech. Too negative, but also consistently negative. So consistent that it begins to look like a fixed attitude, and &lt;em&gt;idee fixe&lt;/em&gt; as it’s sometimes called.&lt;/p&gt;
+
+  &lt;p&gt;Jaques gives the game away when he describes his penchant for melancholy, see p.139 lines 10–15. He thrives on melancholy. On p.115 we learn that the old Duke has a similar condition. He is described as being ‘humourous’. This does not mean he makes jokes and laughs a lot. Just the opposite. It means that he suffers from an excess of the one the four ‘humours’, or fluids in the body (humor as in humid). The four essential bodily fluids needed to be balanced for a condition of health. Too much of one produced an imbalance in the personality. So having too much blood made one sanguine (French sang, for blood), or bloody, given to anger and violence. The 4 fluids are black and yellow bile, phlegm and blood. Having too much phlegm made one phlegmatic, a word we still use. Too much black bile made one melancholic, and that is the nature of Jaques’ personality imbalance. It seems more than that, however, he seems to cultivate his melancholy, to enjoy it, perform it. So he is in the final analysis a person who is not at all flexible by nature. By constitution and by personal choice he has fixated himself on a narrow view of the world. He is like the irrational rulers who fix upon one pattern behavior, exile, and don’t shift positions readily.&lt;/p&gt;
+
+  &lt;p&gt;We could note here that Rosalind does not seem to suffer from this kind of personality fixation. She is very willing to adopt a disguise and pretend to be a man in order to keep things moving along. She remains herself even while disguised.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;who-is-flexible&quot;&gt;Who Is Flexible?&lt;/h1&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Well, the exiled have to be, Orlando seems to be, falling back on primal strength, relying on the body alone rather than a fixed social position. If rigidity is to be associated with power, position, then it is likely to be characteristic of men rather than women; women are exiled from power and subject to the whims of ruling males. So Rosalind looks like a key example of flexibility. She hints at one point, however, that flexibility might be available in other ways. When she puts on male costume in Act i, she has to act like a man in order to offer at least symbolic protection to ‘Aliena’–whose very ‘name’ suggests the outcast status. On p. 121 Celia accuses Rosalind of lacking the love “Which teacheth thee that thou and I are one.” that hints at an extreme degree of flexibility in personality, if one person can in fact be another person. it also suggests that there is a kind of love that is not a sickness, not a disaster. Rosalind puts on a pretense of being somebody else when she dons a disguise. On p. 123 she says:&lt;/p&gt;
+
+  &lt;blockquote&gt;
+    &lt;p&gt;We’ll have a swashing and a martial outside,As many other mannish cowards have,&lt;br /&gt;
+That do outface it with their semblances.&lt;/p&gt;
+  &lt;/blockquote&gt;
+
+  &lt;p&gt;She soon begins to show that ‘semblances’, pretenses, might have positive real consequences.&lt;/p&gt;
+
+  &lt;p&gt;On p. 135 she bucks up her courage:&lt;/p&gt;
+
+  &lt;blockquote&gt;
+    &lt;p&gt;But I must comfort the weaker vessel as doublet and hose ought to show itself courageous to petticoat.&lt;/p&gt;
+  &lt;/blockquote&gt;
+
+  &lt;p&gt;She takes courage, that is to say, from the pretense at courage. Which suggests that playing at something might produce that something.&lt;/p&gt;
+
+  &lt;p&gt;And of course it is at a point like this that we remind ourselves that all of Shakespeare’s intent lies in producing semblances, pretenses.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+</description>
+        <pubDate>Thu, 05 Feb 2015 09:00:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/05/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/05/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 7: Gödel&#39;s T, Products, Sums</title>
+        <description>&lt;h1 id=&quot;gdels-t-continued&quot;&gt;Gödel’s T (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;ackermanns-function&quot;&gt;Ackermann’s function&lt;/h2&gt;
+&lt;p&gt;Ackermann’s function is famous for &lt;em&gt;not&lt;/em&gt; being primitive recursive.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(0,n) = n+1&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(m+1,0) = A(m,1)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(m+1,n+1) = A(m,A(m+1,n))&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(4,2) \approx 10^{19729}&lt;/script&gt;
+
+&lt;p&gt;We can, however, define it with the help of higher-order functions. We define:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\textsf{it} &amp; : (\textsf{nat} \to \textsf{nat}) \to \textsf{nat} \to (\textsf{nat} \to \textsf{nat}) \\
+&amp; = \lambda f : \textsf{nat} \to \textsf{nat} . \lambda n : \textsf{nat}. \textsf{rec}(n, (\lambda x : \textsf{nat} . x), \_g, f \circ g)
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We can show that $\textsf{it}(f)(\overline{n})(\overline{m}) = f^{(n)}(\overline{m}) : \textsf{nat}$ by induction on $n$. Note that a bar over a number refers to a program term. Without a bar, they’re just natural numbers.&lt;/p&gt;
+
+&lt;p&gt;Now, we can define Ackermann’s function:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\textsf{ack} &amp; : \textsf{nat} \to \textsf{nat} \to \textsf{nat} \\
+&amp; = \lambda m: \textsf{nat} . \textsf{rec}(m, (\lambda x : \textsf{nat} . S(x)), \_ f.\lambda n : \textsf{nat} . \textsf{it} \; f \; n \; (f(\overline{1})))
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;Theorem&lt;/em&gt;. If $\vdash e : \tau$, then $\exists v . v \textsf{ val} \wedge e \overset{*}{\mapsto} v \textsf{ val} \wedge e \equiv v : \tau$.&lt;/p&gt;
+
+&lt;h2 id=&quot;gdel-numbers&quot;&gt;Gödel numbers&lt;/h2&gt;
+&lt;p&gt;A Gödel numbering is a function that assigns to each symbol and well-formed formula of some formal language a unique natural number:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \ulcorner e \urcorner \in \mathbb{N} &lt;/script&gt;
+
+&lt;p&gt;Let $f_{univ} : \mathbb{N} \to \mathbb{N} \to \mathbb{N}$ (universal function) be defined by&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; f_{univ}(\ulcorner e \urcorner)(m) = n \iff e(\overline{m}) \equiv \overline{n} : \textsf{nat} &lt;/script&gt;
+
+&lt;p&gt;We can prove that this is a mathematical function that cannot be represented in Gödel’s T. The proof is by diagonalization. Thus, you cannot write an interpreter in Gödel’s T. You must be able to write infinite loops to write interpreters.&lt;/p&gt;
+
+&lt;h1 id=&quot;products&quot;&gt;Products&lt;/h1&gt;
+&lt;p&gt;Product types are like “and”s.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \;\vert\; \tau \times \tau \;\vert\; \textsf{unit} \\
+e &amp; ::= \cdots \;\vert\; \langle e, e \rangle \;\vert\; e \cdot l \;\vert\; e \cdot r \;\vert\; \langle \rangle
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e_1 : \tau_1 \;\;\;\; \Gamma \vdash e_2 : \tau_2}
+{\Gamma \vdash \langle e_1,e_2 \rangle : \tau_1 \times \tau_2}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \tau_1 \times \tau_2}
+{\Gamma \vdash e \cdot l : \tau_1}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \tau_1 \times \tau_2}
+{\Gamma \vdash e \cdot r : \tau_2}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\Gamma \vdash \langle \rangle : \textsf{unit}}
+&lt;/script&gt;
+
+&lt;p&gt;$\langle \rangle$ and $\langle e, e \rangle$ are the introduction forms, and $e \cdot l$ and $e \cdot r$ are the elimination forms.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\lceil e_1\textsf{ val} \rceil \;\;\;\; \lceil e_2\textsf{ val} \rceil}
+{\langle e_1, e_2 \rangle \textsf{ val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\langle \rangle \textsf{ val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1 \mapsto e_1&#39;}
+{\langle e_1, e_2 \rangle \mapsto \langle e_1&#39;, e_2 \rangle}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1\textsf{ val} \;\;\;\; e_2 \mapsto e_2&#39;}
+{\langle e_1, e_2 \rangle \mapsto \langle e_1, e_2&#39; \rangle}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{e \cdot l \mapsto e&#39; \cdot l}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1\textsf{ val} \;\;\;\; e_2\textsf{ val}}
+{\langle e_1, e_2 \rangle \cdot l \mapsto e_1}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{e \cdot r \mapsto e&#39; \cdot r}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1\textsf{ val} \;\;\;\; e_2\textsf{ val}}
+{\langle e_1, e_2 \rangle \cdot r \mapsto e_2}
+&lt;/script&gt;
+
+&lt;h1 id=&quot;sum&quot;&gt;Sum&lt;/h1&gt;
+&lt;p&gt;Sum types are like “or”s. They’re a part of datatypes in ML.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \;\vert\; \tau + \tau \;\vert\; \textsf{void} \\
+e &amp; ::= \cdots \;\vert\; l \cdot e \;\vert\; r \cdot e \;\vert\; \textsf{case } e \{ l \cdot x \Rightarrow e \;\vert\; r \cdot x \Rightarrow e \} \;\vert\; \textsf{void}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We write $\textsf{case}$ as $\textsf{case}(e ; x.e ; x \cdot e)$.&lt;/p&gt;
+
+&lt;p&gt;Note that C’s $\textsf{void}$ is comparable to $\textsf{unit}$, not $\textsf{void}$.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;[missing a lot of judgments]&lt;/em&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \textsf{void}}
+{\Gamma \vdash \textsf{abort } e : \tau}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e\textsf{ val}}
+{l \cdot e \textsf{ val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e\textsf{ val}}
+{r \cdot e \textsf{ val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{l \cdot e \mapsto l \cdot e&#39;}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{r \cdot e \mapsto r \cdot e&#39;}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{\textsf{case}(e ; x . e_1 ; x . e_2) \mapsto \textsf{case}(e&#39; ; x . e_1 ; x.e_2)}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \textsf{ val}}
+{\textsf{case}(e ; x . e_1 ; x . e_2) \mapsto [e/x]\;e_1}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{\textsf{abort } e \mapsto \textsf{ abort } e&#39;}
+&lt;/script&gt;
+</description>
+        <pubDate>Tue, 03 Feb 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/03/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/03/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>76-221 Class 7: As You Like It</title>
+        <description>&lt;h1 id=&quot;lovefamily&quot;&gt;Love/Family&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;family members in power (Oliver, Duke Frederick) favor power/wealth over other family members (brother Orlando, niece Rosalind)&lt;/li&gt;
+  &lt;li&gt;fatherhood: Duke Senior, Sir Rowland de Boys&lt;/li&gt;
+  &lt;li&gt;falling in love in an instant: Orlando and Rosalind&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;nature&quot;&gt;Nature&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;society is corrupt, nature is goodness&lt;/li&gt;
+  &lt;li&gt;Duke Senior in the forest vs Duke Ferdinand in society&lt;/li&gt;
+  &lt;li&gt;hospitality in the forest vs banishment in society&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;education&quot;&gt;Education&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;Orlando is uneducated, yet “learned”
+    &lt;ul&gt;
+      &lt;li&gt;Orlando is physically capable (skilled wrestler) rather than mentally so.&lt;/li&gt;
+      &lt;li&gt;Physical strength is more valuable outside of society, in nature.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;if society is corrupt, then is education as well?&lt;/li&gt;
+  &lt;li&gt;there is no society in the forest, and thus no education, and thus only fools (such as Touchstone)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;time&quot;&gt;Time&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;1.1.103: Charles on Arden: young gentlemen “fleet the time carelessly”&lt;/li&gt;
+  &lt;li&gt;2.7: Jaques’s account of Touchstone’s speech on time (also apparently sexual innuendo): “And so, from hour to hour, we ripe and ripe / And then, from hour to hour, we rot and rot”&lt;/li&gt;
+  &lt;li&gt;2.7: Orlando, after “speak you so gently”: “Lose and neglect the creeping hours of time”&lt;/li&gt;
+  &lt;li&gt;2.7: Jaques’s “all the world’s a stage” monologue: “And one man in his time plays many parts”&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;all-the-worlds-a-stage&quot;&gt;All the World’s a Stage&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;pessimistic and deterministic&lt;/li&gt;
+  &lt;li&gt;the stages of life&lt;/li&gt;
+  &lt;li&gt;all goes towards oblivion&lt;/li&gt;
+  &lt;li&gt;watch for (better) monologues on life and the passage of time&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Tue, 03 Feb 2015 09:00:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/03/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/03/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 6: Gödel&#39;s T</title>
+        <description>&lt;h1 id=&quot;gdels-t-mathcalltextsfnatto&quot;&gt;Gödel’s T ($\mathcal{L}(\textsf{nat}\;\to)$)&lt;/h1&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \textsf{nat} \;\vert\; \tau \to \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= x \;\vert\; \lambda x : \tau.e \;\vert\; Z \;\vert\; S(e) \;\vert\; \textsf{rec}\;e\;\{ Z \Rightarrow e_0 \;\vert\; S(x) \textsf{ with } y \Rightarrow e_1 \}&lt;/script&gt;
+
+&lt;p&gt;Our shorthand for $\textsf{rec}$ is $\textsf{rec}(e ; e_0 ; x, y\cdot e_1)$.&lt;/p&gt;
+
+&lt;p&gt;Factorial would be:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\textsf{fact} = \lambda x : \textsf{nat}.\textsf{rec}\; x \{ Z \Rightarrow S(Z) \;\vert\; S(y) \textsf{ with } w \Rightarrow S(y) * w \}&lt;/script&gt;
+
+&lt;p&gt;Recursion in this language is &lt;em&gt;primitive recursion&lt;/em&gt;, because you can only recurse on your predecessor, rather than all other values. &lt;em&gt;Iteration&lt;/em&gt; is a special case of primitive recursion, when you recurse on number of iterations.&lt;/p&gt;
+
+&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\Gamma \vdash Z : \textsf{nat}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \textsf{nat}}
+{\Gamma \vdash S(e) : \textsf{nat}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e : \textsf{nat} \;\;\;\; \Gamma \vdash e_0 : \tau \;\;\;\; \Gamma, x : \textsf{nat}, y : \tau \vdash e_1 : \tau}
+{\Gamma \vdash \textsf{rec}(e ; e_0; xy \cdot e_1) : \tau}
+&lt;/script&gt;
+
+&lt;h2 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{z \; \textsf{val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \; \textsf{val}}
+{S(e) \; \textsf{val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\lambda x : \tau.e \; \textsf{val}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{S(e) \mapsto S(e&#39;)}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{\textsf{rec}(e; e_0; xy \cdot e_1) \mapsto \textsf{rec}(e&#39;;e_0;xy \cdot e_1)}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\textsf{rec}(Z ; e_0 ; xy \cdot e_1) \mapsto e_0}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{S(e) \; \textsf{val}}
+{\textsf{rec}(S(e); e_0; xy \cdot e_1) \mapsto
+[e, \textsf{rec}(e ; e_0 ; xy \cdot e_1) / xy]e_1}
+&lt;/script&gt;
+
+&lt;p&gt;This is a simultaneous substitution. $e$ is substituted for $x$, and $\textsf{rec}(e ; e_0 ; xy \cdot e_1)$ is substituted for $y$. It needs to be simultaneous because otherwise we could end up substituting (incorrectly) this $x$ for $x$s that occur in $y$.&lt;/p&gt;
+
+&lt;h2 id=&quot;axiomatic-semantics&quot;&gt;Axiomatic Semantics&lt;/h2&gt;
+
+&lt;h3 id=&quot;definitional-equality&quot;&gt;Definitional Equality&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\Gamma \vdash e \equiv e&#39; : \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash e_1 \equiv e_1&#39; : \tau \to \tau&#39; \;\;\;\; \Gamma e_2 \equiv e_2&#39; : \tau}
+{\Gamma \vdash e_1e_2 \equiv e_1&#39;e_2&#39; : \tau&#39;}
+&lt;/script&gt;
+
+&lt;p&gt;and similar rules apply for $\lambda, \textsf{rec}$, etc. This is an equivalence relation.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; If $\vdash e \equiv e’ : \textsf{nat}$ and $e \mapsto v$, then $e’ \mapsto v$.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; If $\vdash e \equiv e’ : \tau_1 \mapsto \tau_2$ and $e \overset{*}{\mapsto} \lambda x : \tau_2 . e_1$, then $e’ \mapsto&lt;br /&gt;
+\lambda x  : \tau_1 . e_1’$ and $x : \tau_1 \mapsto e_1 \equiv e_1’:&lt;br /&gt;
+\tau_2$.&lt;/p&gt;
+
+&lt;p&gt;Note that $\overline{0} = Z$, $\overline{n+1} = S(\overline{n})$, and $\overline{3} = S(S(S(Z)))$.&lt;/p&gt;
+
+&lt;p&gt;A function $f : \mathbb{N} \to \mathbb{N}$ is &lt;em&gt;definable&lt;/em&gt; if there exists $e_f : \textsf{nat} \mapsto \textsf{nat}$ such that $\forall n \leftarrow \mathbb{N} . e_f(\overline{n}) \equiv \overline{f(n)} : \textsf{nat}$.&lt;/p&gt;
+
+&lt;p&gt;For example:&lt;br /&gt;
+Let $f(n) = 2n$. Let $e_f = \lambda n : \textsf{nat}.\textsf{rec}(n;Z;xy.S(S(y)))$. We claim that $\forall n . e_f(\overline(n)) \equiv \overline{f(n)} : \textsf{nat}$. We can prove this via induction on $n$.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 29 Jan 2015 13:30:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/01/29/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/01/29/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+  </channel>
+</rss>
