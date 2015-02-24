@@ -6,9 +6,90 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 23 Feb 2015 22:27:00 -0500</pubDate>
-    <lastBuildDate>Mon, 23 Feb 2015 22:27:00 -0500</lastBuildDate>
+    <pubDate>Tue, 24 Feb 2015 10:48:31 -0500</pubDate>
+    <lastBuildDate>Tue, 24 Feb 2015 10:48:31 -0500</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>76-221 Class 13: Gulliver&#39;s Travels</title>
+        <description>&lt;p&gt;Occasionally, irrationality is part of being human. Swift was an early proponent of the idea that the main thing that differentiates from animals is language.&lt;/p&gt;
+
+&lt;h2 id=&quot;p-62&quot;&gt;p. 62&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;lots of unnecessary detail&lt;/li&gt;
+  &lt;li&gt;joke is that he doesn’t need to defend her, because he is 12 times larger than her&lt;/li&gt;
+  &lt;li&gt;too much association with the Lilliputians&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;p-80&quot;&gt;p. 80&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;long, overly-detailed passages as a game&lt;/li&gt;
+  &lt;li&gt;playing with the reader&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;pp-21-2&quot;&gt;pp. 21-2&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Swift is fond of puns&lt;/li&gt;
+  &lt;li&gt;“Master Mr. Bates” to “Mr. Bates” to, finally, “Master Bates”&lt;/li&gt;
+  &lt;li&gt;purpose of language is not communication
+    &lt;ul&gt;
+      &lt;li&gt;part of who we are&lt;/li&gt;
+      &lt;li&gt;like why a monkey swings on his tail&lt;/li&gt;
+      &lt;li&gt;something for us to play with&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;p-71&quot;&gt;p. 71&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;a “real boat” is real because it’s his size&lt;/li&gt;
+  &lt;li&gt;shows he is getting out of his fictional mindset&lt;/li&gt;
+  &lt;li&gt;Swift is showing that the body insists when it is denied&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;pp-82-3&quot;&gt;pp. 82-3&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Worries that Brobdingnags would dash him against the ground, just as he was earlier considering dashing the Lilliputians against the ground
+    &lt;ul&gt;
+      &lt;li&gt;He doesn’t explicitly recognize this connection&lt;/li&gt;
+      &lt;li&gt;to be human is to make connections, to have narrative history&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;p-110&quot;&gt;p. 110&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;beauty is relative, but still necessary&lt;/li&gt;
+  &lt;li&gt;it’s all a matter of perspective&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;p-111&quot;&gt;p. 111&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;right after passage on beauty (or lack thereof)&lt;/li&gt;
+  &lt;li&gt;grotesque&lt;/li&gt;
+  &lt;li&gt;fountain of blood from neck stump compared to fountain in Palace of Versailles
+    &lt;ul&gt;
+      &lt;li&gt;quite an inappropriate comparison&lt;/li&gt;
+      &lt;li&gt;misfit&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;neither the actual beheading nor the fountain of blood bothered him, but the bouncing of the head startled him&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Aside: William Boroughs claimed the above two passages inspired &lt;em&gt;Naked Lunch.&lt;/em&gt; He claims they present an argument against capital punishment.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Tue, 24 Feb 2015 09:00:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/24/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/24/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 12: The Untyped Lambda Calculus</title>
@@ -1012,61 +1093,6 @@ e &amp; ::= \cdots \;\vert\; l \cdot e \;\vert\; r \cdot e \;\vert\; \textsf{cas
         <category>cmu</category>
         
         <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 7: As You Like It</title>
-        <description>&lt;h1 id=&quot;lovefamily&quot;&gt;Love/Family&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;family members in power (Oliver, Duke Frederick) favor power/wealth over other family members (brother Orlando, niece Rosalind)&lt;/li&gt;
-  &lt;li&gt;fatherhood: Duke Senior, Sir Rowland de Boys&lt;/li&gt;
-  &lt;li&gt;falling in love in an instant: Orlando and Rosalind&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;nature&quot;&gt;Nature&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;society is corrupt, nature is goodness&lt;/li&gt;
-  &lt;li&gt;Duke Senior in the forest vs Duke Ferdinand in society&lt;/li&gt;
-  &lt;li&gt;hospitality in the forest vs banishment in society&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;education&quot;&gt;Education&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;Orlando is uneducated, yet “learned”
-    &lt;ul&gt;
-      &lt;li&gt;Orlando is physically capable (skilled wrestler) rather than mentally so.&lt;/li&gt;
-      &lt;li&gt;Physical strength is more valuable outside of society, in nature.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;if society is corrupt, then is education as well?&lt;/li&gt;
-  &lt;li&gt;there is no society in the forest, and thus no education, and thus only fools (such as Touchstone)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;time&quot;&gt;Time&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;1.1.103: Charles on Arden: young gentlemen “fleet the time carelessly”&lt;/li&gt;
-  &lt;li&gt;2.7: Jaques’s account of Touchstone’s speech on time (also apparently sexual innuendo): “And so, from hour to hour, we ripe and ripe / And then, from hour to hour, we rot and rot”&lt;/li&gt;
-  &lt;li&gt;2.7: Orlando, after “speak you so gently”: “Lose and neglect the creeping hours of time”&lt;/li&gt;
-  &lt;li&gt;2.7: Jaques’s “all the world’s a stage” monologue: “And one man in his time plays many parts”&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;all-the-worlds-a-stage&quot;&gt;All the World’s a Stage&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;pessimistic and deterministic&lt;/li&gt;
-  &lt;li&gt;the stages of life&lt;/li&gt;
-  &lt;li&gt;all goes towards oblivion&lt;/li&gt;
-  &lt;li&gt;watch for (better) monologues on life and the passage of time&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        <pubDate>Tue, 03 Feb 2015 09:00:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/03/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/03/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
         
       </item>
     
