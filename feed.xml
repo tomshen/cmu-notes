@@ -6,9 +6,207 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 24 Feb 2015 10:48:31 -0500</pubDate>
-    <lastBuildDate>Tue, 24 Feb 2015 10:48:31 -0500</lastBuildDate>
+    <pubDate>Tue, 24 Feb 2015 14:50:57 -0500</pubDate>
+    <lastBuildDate>Tue, 24 Feb 2015 14:50:57 -0500</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 13: Modernized Algol</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\newcommand\ok[1]{#1~~\m{ok}}
+\def\natt{\m{nat}}
+\def\gap{\hspace{1cm}}
+\def\valt{\m{val}}
+\newcommand\val[1]{#1~\valt}
+\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
+\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
+\def\gt{\mapsto}
+\def\gts{\gt_{\scriptscriptstyle\sig}}
+\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
+\def\defeq{\overset{def}{=}}
+
+\def\prove{\vdash}
+\def\provesig{\prove_{\scriptscriptstyle\sig}}
+\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
+
+\def\cmdt{\m{cmd}}
+\newcommand\cmd[1]{\cmdt~#1}
+
+\newcommand\ret[1]{\m{ret}~#1}
+
+\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
+\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
+
+\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
+
+\def\midd{~||~}
+
+\newcommand\do[1]{\m{do}~#1}
+
+\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
+
+\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
+
+\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
+\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
+
+\newcommand\get[1]{@#1}
+\newcommand\geta[1]{\m{get}[#1]}
+
+\newcommand\set[2]{#1 := #2}
+\newcommand\seta[2]{\m{set}[#1](#2)}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;imperative-languages&quot;&gt;Imperative Languages&lt;/h1&gt;
+&lt;p&gt;We’re going to discuss Algol, which inspired Pascal, which inspired C. In particular, we’re going talk about &lt;em&gt;Modernized Algol&lt;/em&gt;, which isn’t a real language.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Expressions&lt;/em&gt; are &lt;em&gt;pure&lt;/em&gt;: they have no side effects. Expressions are often referred to as terms.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Commands&lt;/em&gt; are &lt;em&gt;impure&lt;/em&gt;: they may have &lt;em&gt;side effects&lt;/em&gt;; they do something to the world. Side effects can involve changes to the store (modifying memory), or input and output. Commands are often referred to as, rather confusingly, expressions.&lt;/p&gt;
+
+&lt;h1 id=&quot;modernized-algol&quot;&gt;Modernized Algol&lt;/h1&gt;
+&lt;p&gt;A lot of justifications for why things in this language are the way they are will be by &lt;em&gt;lax logic&lt;/em&gt;.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \mid \cmdt \\
+e &amp; ::= \cdots \mid \cmd{m} \\
+m &amp; ::= \ret{e} \mid \bnd{x}{e}{m} \mid \dcl{a}{e}{m} \mid \get{a} \mid \set{a}{e}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;$m$ is a &lt;em&gt;command&lt;/em&gt;. $a$ is an &lt;em&gt;assignable&lt;/em&gt;. It’s commonly referred to as a variable, which is incorrect, because it’s not given meaning through substitution.&lt;/p&gt;
+
+&lt;p&gt;Note that $\m{bnd}$ is not the same as $\m{let}$. With a $\m{bnd}$ command, once $e$ becomes a value, we know it’s a encapsulated command, so we execute it. With a $\m{let}$ expression, we substitute the value of $e$ in for $x$.&lt;/p&gt;
+
+&lt;p&gt;The abstract syntax for some of the commands are:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcla{e}{a}{m} \gap \geta{a} \gap \seta{a}{e}&lt;/script&gt;
+
+&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt; is a &lt;em&gt;signature&lt;/em&gt;. In this language, it is a set of assignables.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx, x : \tau \provesig e : \tau&#39;}
+{\ctx \provesig \lambda x : \tau . e : \tau \rightharpoonup \tau&#39;}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig \ok{m}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig \ok{m}}
+{\ctx \provesig \cmd{m} : \cmdt}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \natt}
+{\ctx \provesig \ok{\ret{e}}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \cmdt \gap \Gamma, x : \natt \provesig \ok{m}}
+{\ctx \provesig \ok{\bnd{x}{e}{m}}}
+&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \natt \gap \ctx \provesigx{a} \ok{m}}
+{\ctx \provesig \dcl{a}{e}{\ok{m}}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{a \in \sig}
+{\ctx \provesig \ok{\get{a}}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{a \in \sig \gap \ctx \provesig e : \natt}
+{\ctx \provesig \ok{\set{a}{e}}}&lt;/script&gt;
+
+&lt;p&gt;Note that there is an implicit assumption that $a \not\in \sig$. Note also that this assignment is not persistent. In an implementation, $a$ would reside on the stack, and this is commonly referred to as &lt;em&gt;stack discipline&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\vals{e}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \gts e&#39;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\mu&lt;/script&gt; is a &lt;em&gt;state&lt;/em&gt;, representing memory where assignables are mapped to values. $m$ is a command.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\final{m \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}{\vals{\cmd{m}}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e}}
+{\ret{e} \midd \final{\mu}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \gts e&#39;}
+{\ret{e} \midd \mu \gts \ret{e&#39;} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \gts e&#39;}
+{\bnd{x}{e}{m} \midd \mu \gts \bnd{x}{e&#39;}{m \midd \mu}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{m_1 \midd \mu \gts m_1&#39; \midd \mu&#39;}
+{\bnd{x}{\cmd{m_1}}{m_2} \midd \mu \gts \bnd{x}{\cmd{m_1&#39;}}{m_2} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e}}
+{\bnd{x}{\cmd{(\ret{e})}}{m} \midd \mu \gts [e/x]~m \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \gts e&#39;}
+{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e} \gap m \midd (\mu, a \hookrightarrow e) \gtsx{a} m&#39; \midd (\mu&#39;, a \hookrightarrow e&#39;)}
+{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m&#39;} \midd \mu&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e_1} \gap \valsx{e_2}{a}}
+{\dcl{a}{e_1}{\ret{e_2}} \midd \mu \gts \ret{e_2} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\get{a} \midd (\mu, a \hookrightarrow e) \gtsx{a} \ret{e} \midd (\mu, a \hookrightarrow e)}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1 \gtsx{a} e_1&#39;}
+{\set{a}{e} \midd \mu \gts \set{a}{e_1&#39;} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e_1}}
+{\set{a}{e_1} \midd (\mu, a \hookrightarrow e_2) \gts \ret{e_1} \midd (\mu, a \hookrightarrow e_1)}&lt;/script&gt;
+
+&lt;h2 id=&quot;syntactic-sugar&quot;&gt;Syntactic Sugar&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\bind{x}{m}{m&#39;} &amp; \defeq \bnd{x}{\cmd{m}}{m&#39;} \\
+\do{e} &amp; \defeq \bnd{x}{e}{\ret{x}} \\
+\ifelse{m}{m_1}{m_2} &amp; \defeq \bind{x}{m}{\do{(\ifz{x}{\cmd{m_1}}{\_}{\cmd{m_2}})}}
+\end{align} %]]&gt;&lt;/script&gt;
+</description>
+        <pubDate>Tue, 24 Feb 2015 13:30:41 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/24/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/24/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>76-221 Class 13: Gulliver&#39;s Travels</title>
@@ -910,189 +1108,6 @@ That do outface it with their semblances.&lt;/p&gt;
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 7: Gödel&#39;s T, Products, Sums</title>
-        <description>&lt;h1 id=&quot;gdels-t-continued&quot;&gt;Gödel’s T (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;ackermanns-function&quot;&gt;Ackermann’s function&lt;/h2&gt;
-&lt;p&gt;Ackermann’s function is famous for &lt;em&gt;not&lt;/em&gt; being primitive recursive.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(0,n) = n+1&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(m+1,0) = A(m,1)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(m+1,n+1) = A(m,A(m+1,n))&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;A(4,2) \approx 10^{19729}&lt;/script&gt;
-
-&lt;p&gt;We can, however, define it with the help of higher-order functions. We define:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\textsf{it} &amp; : (\textsf{nat} \to \textsf{nat}) \to \textsf{nat} \to (\textsf{nat} \to \textsf{nat}) \\
-&amp; = \lambda f : \textsf{nat} \to \textsf{nat} . \lambda n : \textsf{nat}. \textsf{rec}(n, (\lambda x : \textsf{nat} . x), \_g, f \circ g)
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;We can show that $\textsf{it}(f)(\overline{n})(\overline{m}) = f^{(n)}(\overline{m}) : \textsf{nat}$ by induction on $n$. Note that a bar over a number refers to a program term. Without a bar, they’re just natural numbers.&lt;/p&gt;
-
-&lt;p&gt;Now, we can define Ackermann’s function:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\textsf{ack} &amp; : \textsf{nat} \to \textsf{nat} \to \textsf{nat} \\
-&amp; = \lambda m: \textsf{nat} . \textsf{rec}(m, (\lambda x : \textsf{nat} . S(x)), \_ f.\lambda n : \textsf{nat} . \textsf{it} \; f \; n \; (f(\overline{1})))
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;&lt;em&gt;Theorem&lt;/em&gt;. If $\vdash e : \tau$, then $\exists v . v \textsf{ val} \wedge e \overset{*}{\mapsto} v \textsf{ val} \wedge e \equiv v : \tau$.&lt;/p&gt;
-
-&lt;h2 id=&quot;gdel-numbers&quot;&gt;Gödel numbers&lt;/h2&gt;
-&lt;p&gt;A Gödel numbering is a function that assigns to each symbol and well-formed formula of some formal language a unique natural number:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; \ulcorner e \urcorner \in \mathbb{N} &lt;/script&gt;
-
-&lt;p&gt;Let $f_{univ} : \mathbb{N} \to \mathbb{N} \to \mathbb{N}$ (universal function) be defined by&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; f_{univ}(\ulcorner e \urcorner)(m) = n \iff e(\overline{m}) \equiv \overline{n} : \textsf{nat} &lt;/script&gt;
-
-&lt;p&gt;We can prove that this is a mathematical function that cannot be represented in Gödel’s T. The proof is by diagonalization. Thus, you cannot write an interpreter in Gödel’s T. You must be able to write infinite loops to write interpreters.&lt;/p&gt;
-
-&lt;h1 id=&quot;products&quot;&gt;Products&lt;/h1&gt;
-&lt;p&gt;Product types are like “and”s.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \;\vert\; \tau \times \tau \;\vert\; \textsf{unit} \\
-e &amp; ::= \cdots \;\vert\; \langle e, e \rangle \;\vert\; e \cdot l \;\vert\; e \cdot r \;\vert\; \langle \rangle
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e_1 : \tau_1 \;\;\;\; \Gamma \vdash e_2 : \tau_2}
-{\Gamma \vdash \langle e_1,e_2 \rangle : \tau_1 \times \tau_2}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \tau_1 \times \tau_2}
-{\Gamma \vdash e \cdot l : \tau_1}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \tau_1 \times \tau_2}
-{\Gamma \vdash e \cdot r : \tau_2}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\Gamma \vdash \langle \rangle : \textsf{unit}}
-&lt;/script&gt;
-
-&lt;p&gt;$\langle \rangle$ and $\langle e, e \rangle$ are the introduction forms, and $e \cdot l$ and $e \cdot r$ are the elimination forms.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\lceil e_1\textsf{ val} \rceil \;\;\;\; \lceil e_2\textsf{ val} \rceil}
-{\langle e_1, e_2 \rangle \textsf{ val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\langle \rangle \textsf{ val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e_1 \mapsto e_1&#39;}
-{\langle e_1, e_2 \rangle \mapsto \langle e_1&#39;, e_2 \rangle}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e_1\textsf{ val} \;\;\;\; e_2 \mapsto e_2&#39;}
-{\langle e_1, e_2 \rangle \mapsto \langle e_1, e_2&#39; \rangle}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{e \cdot l \mapsto e&#39; \cdot l}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e_1\textsf{ val} \;\;\;\; e_2\textsf{ val}}
-{\langle e_1, e_2 \rangle \cdot l \mapsto e_1}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{e \cdot r \mapsto e&#39; \cdot r}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e_1\textsf{ val} \;\;\;\; e_2\textsf{ val}}
-{\langle e_1, e_2 \rangle \cdot r \mapsto e_2}
-&lt;/script&gt;
-
-&lt;h1 id=&quot;sum&quot;&gt;Sum&lt;/h1&gt;
-&lt;p&gt;Sum types are like “or”s. They’re a part of datatypes in ML.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \;\vert\; \tau + \tau \;\vert\; \textsf{void} \\
-e &amp; ::= \cdots \;\vert\; l \cdot e \;\vert\; r \cdot e \;\vert\; \textsf{case } e \{ l \cdot x \Rightarrow e \;\vert\; r \cdot x \Rightarrow e \} \;\vert\; \textsf{void}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;We write $\textsf{case}$ as $\textsf{case}(e ; x.e ; x \cdot e)$.&lt;/p&gt;
-
-&lt;p&gt;Note that C’s $\textsf{void}$ is comparable to $\textsf{unit}$, not $\textsf{void}$.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;[missing a lot of judgments]&lt;/em&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \textsf{void}}
-{\Gamma \vdash \textsf{abort } e : \tau}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e\textsf{ val}}
-{l \cdot e \textsf{ val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e\textsf{ val}}
-{r \cdot e \textsf{ val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{l \cdot e \mapsto l \cdot e&#39;}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{r \cdot e \mapsto r \cdot e&#39;}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{\textsf{case}(e ; x . e_1 ; x . e_2) \mapsto \textsf{case}(e&#39; ; x . e_1 ; x.e_2)}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \textsf{ val}}
-{\textsf{case}(e ; x . e_1 ; x . e_2) \mapsto [e/x]\;e_1}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{\textsf{abort } e \mapsto \textsf{ abort } e&#39;}
-&lt;/script&gt;
-</description>
-        <pubDate>Tue, 03 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/03/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/03/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
