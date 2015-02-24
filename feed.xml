@@ -6,8 +6,8 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 19 Feb 2015 14:34:20 -0500</pubDate>
-    <lastBuildDate>Thu, 19 Feb 2015 14:34:20 -0500</lastBuildDate>
+    <pubDate>Mon, 23 Feb 2015 22:27:00 -0500</pubDate>
+    <lastBuildDate>Mon, 23 Feb 2015 22:27:00 -0500</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -219,6 +219,52 @@ e : \dyn \rightharpoonup \dyn &amp; \m{if } c= \fun
         <category>cmu</category>
         
         <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>76-221 Class 11: Gulliver&#39;s Travels</title>
+        <description>&lt;p&gt;The prevailing idea of what it means to be a person at the time &lt;em&gt;Gulliver’s Travels&lt;/em&gt; was written was:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;chain of being: God to angels to humans (rational animals)&lt;/li&gt;
+  &lt;li&gt;hierarchy&lt;/li&gt;
+  &lt;li&gt;animals are without spirit or reason&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Is Gulliver a rational animal? We can consider him rational because he’s clearly a thinking being. But, we can also consider him an animal, and sometimes even irrational:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;talks about “making water” (p. 27)&lt;/li&gt;
+  &lt;li&gt;traveling repeatedly despite the trouble he always runs into&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Compare &lt;em&gt;Gulliver’s Travels&lt;/em&gt; to the &lt;em&gt;Odyssey&lt;/em&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;emphasis on travel versus homecoming&lt;/li&gt;
+  &lt;li&gt;hospitality
+    &lt;ul&gt;
+      &lt;li&gt;because strangers may be gods in the &lt;em&gt;Odyssey&lt;/em&gt;&lt;/li&gt;
+      &lt;li&gt;why is hospitality so common in &lt;em&gt;Gulliver’s Travels&lt;/em&gt;?&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Cross-culture assimilation is part of human nature. But Gulliver takes it perhaps too far: he pretends to be a Lilliputian, and looks down on nobles of lower rank in their society. When he “makes water,” he sees it from their perspective: as a “torrent.”&lt;/p&gt;
+
+&lt;p&gt;Violence is very much a part of Gulliver’s society, at least directed at smaller beings. He thinks nothing of dashing small animals against the ground. But, honor holds him back from doing so to the similarly small Lilliputians: assimilation!&lt;/p&gt;
+
+&lt;p&gt;Is Gulliver a reliable narrator? While reading, it is easy for us to “believe in” the Lilliputians. &lt;/p&gt;
+</description>
+        <pubDate>Tue, 17 Feb 2015 00:09:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/17/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/17/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
         
       </item>
     
@@ -1021,116 +1067,6 @@ e &amp; ::= \cdots \;\vert\; l \cdot e \;\vert\; r \cdot e \;\vert\; \textsf{cas
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 6: Gödel&#39;s T</title>
-        <description>&lt;h1 id=&quot;gdels-t-mathcalltextsfnatto&quot;&gt;Gödel’s T ($\mathcal{L}(\textsf{nat}\;\to)$)&lt;/h1&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \textsf{nat} \;\vert\; \tau \to \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= x \;\vert\; \lambda x : \tau.e \;\vert\; Z \;\vert\; S(e) \;\vert\; \textsf{rec}\;e\;\{ Z \Rightarrow e_0 \;\vert\; S(x) \textsf{ with } y \Rightarrow e_1 \}&lt;/script&gt;
-
-&lt;p&gt;Our shorthand for $\textsf{rec}$ is $\textsf{rec}(e ; e_0 ; x, y\cdot e_1)$.&lt;/p&gt;
-
-&lt;p&gt;Factorial would be:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\textsf{fact} = \lambda x : \textsf{nat}.\textsf{rec}\; x \{ Z \Rightarrow S(Z) \;\vert\; S(y) \textsf{ with } w \Rightarrow S(y) * w \}&lt;/script&gt;
-
-&lt;p&gt;Recursion in this language is &lt;em&gt;primitive recursion&lt;/em&gt;, because you can only recurse on your predecessor, rather than all other values. &lt;em&gt;Iteration&lt;/em&gt; is a special case of primitive recursion, when you recurse on number of iterations.&lt;/p&gt;
-
-&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\Gamma \vdash Z : \textsf{nat}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \textsf{nat}}
-{\Gamma \vdash S(e) : \textsf{nat}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \textsf{nat} \;\;\;\; \Gamma \vdash e_0 : \tau \;\;\;\; \Gamma, x : \textsf{nat}, y : \tau \vdash e_1 : \tau}
-{\Gamma \vdash \textsf{rec}(e ; e_0; xy \cdot e_1) : \tau}
-&lt;/script&gt;
-
-&lt;h2 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{z \; \textsf{val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \; \textsf{val}}
-{S(e) \; \textsf{val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\lambda x : \tau.e \; \textsf{val}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{S(e) \mapsto S(e&#39;)}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \mapsto e&#39;}
-{\textsf{rec}(e; e_0; xy \cdot e_1) \mapsto \textsf{rec}(e&#39;;e_0;xy \cdot e_1)}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\textsf{rec}(Z ; e_0 ; xy \cdot e_1) \mapsto e_0}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{S(e) \; \textsf{val}}
-{\textsf{rec}(S(e); e_0; xy \cdot e_1) \mapsto
-[e, \textsf{rec}(e ; e_0 ; xy \cdot e_1) / xy]e_1}
-&lt;/script&gt;
-
-&lt;p&gt;This is a simultaneous substitution. $e$ is substituted for $x$, and $\textsf{rec}(e ; e_0 ; xy \cdot e_1)$ is substituted for $y$. It needs to be simultaneous because otherwise we could end up substituting (incorrectly) this $x$ for $x$s that occur in $y$.&lt;/p&gt;
-
-&lt;h2 id=&quot;axiomatic-semantics&quot;&gt;Axiomatic Semantics&lt;/h2&gt;
-
-&lt;h3 id=&quot;definitional-equality&quot;&gt;Definitional Equality&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\Gamma \vdash e \equiv e&#39; : \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e_1 \equiv e_1&#39; : \tau \to \tau&#39; \;\;\;\; \Gamma e_2 \equiv e_2&#39; : \tau}
-{\Gamma \vdash e_1e_2 \equiv e_1&#39;e_2&#39; : \tau&#39;}
-&lt;/script&gt;
-
-&lt;p&gt;and similar rules apply for $\lambda, \textsf{rec}$, etc. This is an equivalence relation.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; If $\vdash e \equiv e’ : \textsf{nat}$ and $e \mapsto v$, then $e’ \mapsto v$.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; If $\vdash e \equiv e’ : \tau_1 \mapsto \tau_2$ and $e \overset{*}{\mapsto} \lambda x : \tau_2 . e_1$, then $e’ \mapsto&lt;br /&gt;
-\lambda x  : \tau_1 . e_1’$ and $x : \tau_1 \mapsto e_1 \equiv e_1’:&lt;br /&gt;
-\tau_2$.&lt;/p&gt;
-
-&lt;p&gt;Note that $\overline{0} = Z$, $\overline{n+1} = S(\overline{n})$, and $\overline{3} = S(S(S(Z)))$.&lt;/p&gt;
-
-&lt;p&gt;A function $f : \mathbb{N} \to \mathbb{N}$ is &lt;em&gt;definable&lt;/em&gt; if there exists $e_f : \textsf{nat} \mapsto \textsf{nat}$ such that $\forall n \leftarrow \mathbb{N} . e_f(\overline{n}) \equiv \overline{f(n)} : \textsf{nat}$.&lt;/p&gt;
-
-&lt;p&gt;For example:&lt;br /&gt;
-Let $f(n) = 2n$. Let $e_f = \lambda n : \textsf{nat}.\textsf{rec}(n;Z;xy.S(S(y)))$. We claim that $\forall n . e_f(\overline(n)) \equiv \overline{f(n)} : \textsf{nat}$. We can prove this via induction on $n$.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 29 Jan 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/01/29/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/01/29/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
