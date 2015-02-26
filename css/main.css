@@ -14,7 +14,7 @@ body {
   font-family: Lora, Georgia, serif;
   font-size: 16px;
   line-height: 1.5;
-  font-weight: 300;
+  font-weight: 400;
   color: #111;
   background-color: #fdfdfd;
   -webkit-text-size-adjust: 100%; }
@@ -62,7 +62,7 @@ li > ol {
  */
 h1, h2, h3, h4, h5, h6 {
   font-family: Lato, Helvetica, Arial, sans-serif;
-  font-weight: 300; }
+  font-weight: 400; }
 
 /**
  * Links
@@ -156,7 +156,7 @@ pre {
   position: relative; }
 
 .site-title {
-  font: 300 26px Lato, Helvetica, Arial, sans-serif;
+  font: 400 26px Lato, Helvetica, Arial, sans-serif;
   line-height: 56px;
   letter-spacing: -1px;
   margin-bottom: 0;

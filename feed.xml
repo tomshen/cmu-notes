@@ -6,9 +6,169 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 24 Feb 2015 14:50:57 -0500</pubDate>
-    <lastBuildDate>Tue, 24 Feb 2015 14:50:57 -0500</lastBuildDate>
+    <pubDate>Thu, 26 Feb 2015 14:53:55 -0500</pubDate>
+    <lastBuildDate>Thu, 26 Feb 2015 14:53:55 -0500</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 14: Modernized Algol</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\newcommand\ok[1]{#1~~\m{ok}}
+\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
+\def\natt{\m{nat}}
+\def\gap{\hspace{1cm}}
+\def\valt{\m{val}}
+\newcommand\val[1]{#1~\valt}
+\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
+\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
+\def\gt{\mapsto}
+\def\gts{\gt_{\scriptscriptstyle\sig}}
+\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
+\def\defeq{\overset{def}{=}}
+
+\def\prove{\vdash}
+\def\provesig{\prove_{\scriptscriptstyle\sig}}
+\def\provee{\prove_{\emptyset}}
+\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
+
+\def\cmdt{\m{cmd}}
+\newcommand\cmd[1]{\cmdt~#1}
+
+\newcommand\ret[1]{\m{ret}~#1}
+
+\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
+\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
+
+\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
+\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
+
+\def\midd{~||~}
+
+\newcommand\do[1]{\m{do}~#1}
+
+\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
+
+\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
+
+\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
+\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
+
+\newcommand\get[1]{@#1}
+\newcommand\geta[1]{\m{get}[#1]}
+
+\newcommand\set[2]{#1 := #2}
+\newcommand\seta[2]{\m{set}[#1](#2)}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;safety&quot;&gt;Safety&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\forall a \in \sig . \exists e . \mu(a) = e \wedge \val{e}_{\emptyset} \wedge \prove_{\emptyset} e : \natt}
+{\mu : \sig}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\provesig \ok{m} \gap \mu : \sig}
+{m \midd \oks{\mu}}&lt;/script&gt;
+
+&lt;h3 id=&quot;progress&quot;&gt;Progress&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;If $\provesig e : \tau$, then either $\vals{e}$ or $e \gts e’$.&lt;/li&gt;
+  &lt;li&gt;If $\provesig \ok{m}$, then either $m \midd \final{\mu}$ or $m \midd \mu \gts m’ \midd u’$ and $\mu : \sig$.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We will consider the $\m{dcl}$ case in the proof of 2.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \natt \gap \ctx \provesigx{a} \ok{m}}
+{\ctx \provesig \dcl{a}{e}{\ok{m}}}&lt;/script&gt;
+
+&lt;p&gt;Suppose $\mu : \sig$. We want to show that $\dcl{a}{e}{m \midd \mu}$ or $\exists m’, \mu’ . \dcl{a}{e}{m \midd \mu} \gts m’ \midd \mu’$. By Progress 1 (or, if we’re proving (1) and (2) simultaneously, by the induction hypothesis), $\vals{e}$ or $e \gts e’$.&lt;/p&gt;
+
+&lt;p&gt;Suppose $e \gts e’$. Then, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m \midd \mu}$.&lt;/p&gt;
+
+&lt;p&gt;Suppose $\vals{e}$. Recall that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e} \gap m \midd (\mu, a \hookrightarrow e) \gtsx{a} m&#39; \midd (\mu&#39;, a \hookrightarrow e&#39;)}
+{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m&#39;} \midd \mu&#39;}&lt;/script&gt;
+
+&lt;p&gt;We claim that $\mu, a \hookrightarrow e : \sig,a$. Note that it is implicit that $a$ is distinct from assignables in $\mu$. We want to show that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\exists e&#39; . (\mu, a \hookrightarrow e)(a) = e&#39; \wedge \val{e&#39;}_{\emptyset} \wedge \provee e&#39;: \natt&lt;/script&gt;
+
+&lt;p&gt;It is sufficient to show that &lt;script type=&quot;math/tex&quot;&gt;\val{e}_{\emptyset} \wedge \provee e : \natt&lt;/script&gt;. By canonical forms, &lt;script type=&quot;math/tex&quot;&gt;e = \bar{n}&lt;/script&gt; for some &lt;script type=&quot;math/tex&quot;&gt;n \in \mathbb{N}&lt;/script&gt;. Therefore, &lt;script type=&quot;math/tex&quot;&gt;\provee \bar{n} : \natt&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{\bar{n}}_{\emptyset}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Thus, we have shown that $\mu, a \hookrightarrow e : \sig,a$, and we can apply our induction hypothesis.&lt;/p&gt;
+
+&lt;p&gt;By the induction hypothesis, either $\finalx{m \midd (\mu, a \hookrightarrow e)}{a}$ or $m \midd (\mu, a \hookrightarrow e) \gtsx{a} m’ \midd \hat{\mu}$. By a lemma (or by preservation), $\hat{\mu} = (\mu’, a \hookrightarrow e’)$.&lt;/p&gt;
+
+&lt;p&gt;In the second case, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m’ \midd \mu’}$.&lt;/p&gt;
+
+&lt;p&gt;In the first case, by inversion, &lt;script type=&quot;math/tex&quot;&gt;m = \ret{e&#39;}&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;\valsx{e&#39;}{a}&lt;/script&gt;. Thus, &lt;script type=&quot;math/tex&quot;&gt;\dcl{a}{e}{m \midd \mu} \gts m \midd \mu&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Thus, we have proved the $\m{dcl}$ case for Progress.&lt;/p&gt;
+
+&lt;h3 id=&quot;preservation&quot;&gt;Preservation&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;If &lt;script type=&quot;math/tex&quot;&gt;\provesig e : \tau&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;e \gts e&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\provesig e&#39; : \tau&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;If &lt;script type=&quot;math/tex&quot;&gt;\provesig \ok{m}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\mu : \sig&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\provesig \ok{m&#39;}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\mu&#39; : \sig&lt;/script&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The proof of Preservation 1 is identical to the proof for Preservation for PCF, except with extra $\sig$s throughout.&lt;/p&gt;
+
+&lt;p&gt;The proof of Preservation 2 is by induction on the derivation of &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;. The $\m{dcl}$ case is proven on p. 331 of &lt;em&gt;PFPL&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;extending-the-language&quot;&gt;Extending the Language&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \mid \cmd{\tau}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig m \sim \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig m \sim \tau}
+{\ctx \provesig \cmd{m} : \cmd{\tau}}&lt;/script&gt;
+</description>
+        <pubDate>Thu, 26 Feb 2015 13:27:18 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/26/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/26/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>76-221 Class 14: Gulliver&#39;s Travels</title>
+        <description>&lt;p&gt;Rather than focusing on the political satire in &lt;em&gt;Gulliver’s Travels&lt;/em&gt;, we’re doing a more critical/perceptive reading. There are many little things in the book that are easily missed. For instance, the fire is started by a maid who is distracted reading a romance novel and thus knocks over a candle. The execution scene is a little strange, as we talked about in the last class.&lt;/p&gt;
+
+&lt;p&gt;On p. 115, we see Gulliver’s “open mindedness” at work. He thinks he’s bigger than he is, and acts like a child to try to prove himself. He actually recognizes that what he’s doing is similar to someone pretending to be someone of higher station, which finds distasteful, but continues his behavior. We can interpret this as either hypocrisy, or &lt;em&gt;less&lt;/em&gt; generously, as sheer forgetfulness.&lt;/p&gt;
+
+&lt;p&gt;Consider the discussion of terrible life of the immortal &lt;em&gt;struldbrugs&lt;/em&gt;. Because they still age, they end up decrepit and useless. Perhaps Swift is commenting on the naturalness of death.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 26 Feb 2015 09:00:00 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/26/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/26/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>76221</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 13: Modernized Algol</title>
@@ -933,176 +1093,6 @@ c \cdot u \Rightarrow e_{dm} \cdot c \cdot d(u) \\} &lt;/script&gt;
         <pubDate>Tue, 10 Feb 2015 09:00:00 -0500</pubDate>
         <link>http://www.tomshen.me/notes/cmu/76221/2015/02/10/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/10/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 8: PCF</title>
-        <description>&lt;h1 id=&quot;pcf-partial-computable-functions&quot;&gt;PCF (Partial Computable Functions)&lt;/h1&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \textsf{nat} \;|\; \tau \rightharpoonup \tau \\
-e &amp; ::= x \;|\; z \;|\; s(e) \;|\; \lambda x : \tau . e \;|\; ee \;|\; \textsf{ifz}e,e_0,x.e_1) \;|\; \textsf{fix}[\tau](x.e)
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;[missing]&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;fixed-point&quot;&gt;Fixed Point&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;Fe \cong e&lt;/script&gt;
-
-&lt;h2 id=&quot;definability&quot;&gt;Definability&lt;/h2&gt;
-&lt;p&gt;$f$ is definable if there exists some $e_f$ such that&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;f(n) = m \iff e_f(\bar{n}) \equiv \bar{m} : \textsf{nat}&lt;/script&gt;
-
-&lt;h2 id=&quot;universal-function&quot;&gt;Universal Function&lt;/h2&gt;
-&lt;p&gt;We can now have infinite loops through recursion:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_D \equiv s(e_D) : \textsf{nat}&lt;/script&gt;
-
-&lt;p&gt;This means we can implement a universal function (recall that we couldn’t in Gödel’s T).&lt;/p&gt;
-
-&lt;p&gt;The class of partial computable functions are exactly those in PCF. PCF is known as the &lt;em&gt;E. coli&lt;/em&gt; of programming languages, because its constructs show in up in many, many other programming languages.&lt;/p&gt;
-
-&lt;h2 id=&quot;conservative-extensions&quot;&gt;Conservative Extensions&lt;/h2&gt;
-&lt;p&gt;Conservative extensions leave the pre-existing constructs alone. For instance, adding products and sums to $\mathcal{L}(\textsf{num}\;\textsf{str})$ did not disturb existing semantics; it just added more of them. Adding recursion is not a conservative extension, because it changes the existing language. This is why you can’t just dump your favorite features from several different languages into one, and expect the new language to work well.&lt;/p&gt;
-
-&lt;h2 id=&quot;datatypes&quot;&gt;Datatypes&lt;/h2&gt;
-&lt;p&gt;$\textsf{nat}$ is no longer a primitive type, but a definable type.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\textsf{datatype}\;\textsf{exp} &amp; = \textsf{Var of variable} \\
-&amp; \;|\; \textsf{Lam} \textsf{ of } \textsf{exp} * (\textsf{variable} * \textsf{exp})\\
-&amp; \;|\; \textsf{App of } \textsf{exp} * \textsf{exp} \\
-&amp; \;|\; \textsf{Unit of unit} \\\\
-
-\textsf{datatype}\;\textsf{nat} &amp; = Z \;|\; S \textsf{ of } \textsf{nat} \\
-
-\textsf{nat} &amp; \cong \textsf{unit} + \textsf{nat}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;h2 id=&quot;recursive-types&quot;&gt;Recursive Types&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \cdots \;|\; \mu \alpha.\tau | \alpha&lt;/script&gt;
-
-&lt;p&gt;Now we can have “bad” types: in $\lambda x.\alpha \ldots$, $\alpha$ is an unbound type. Thus, we need typing semantics:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\tau \textsf{ type}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\textsf{unit} \textsf{ type}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\tau_1 \textsf{ type} \;\;\;\; \tau_2 \textsf{ type}}
-{\tau_1 \rightharpoonup \tau_2 \textsf{ type}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\alpha \;|\; \alpha \textsf{ type} \vdash \tau \textsf{ type}}
-{\mu\alpha.\tau \textsf{ type}}&lt;/script&gt;
-
-&lt;p&gt;which is the same as&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma, \alpha \textsf{ type} \;\;\;\; \Gamma, \tau \textsf{ type}}
-{\Gamma \vdash \mu\alpha.\tau \textsf{ type}}&lt;/script&gt;
-
-&lt;p&gt;All types we can write are closed. They can have bound variables, but no free variables.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\mu\alpha.\tau \cong [\mu\alpha.\tau \;/\; \alpha]\; \tau&lt;/script&gt;
-
-&lt;p&gt;We can define type equivalence in terms of $\equiv$ (equi-recursive types), or $\rightleftarrows$ (iso-recursive types / isomorphic). We choose to define types in terms of iso-recursive types, because it’s more straightforward. This is also how ML does it.&lt;/p&gt;
-
-&lt;p&gt;There are two operations that mediate this isomorphism:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \;|\; \textsf{unfold}(e) \;|\; \textsf{fold}(e)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : \mu\alpha.\tau}
-{\Gamma \vdash \textsf{unfold}(e) : [\mu\alpha . \tau \;/\; \alpha]\; \tau}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : [\mu\alpha . \tau \;/\; \alpha]\; \tau}
-{\Gamma \vdash \textsf{fold}(e) : \mu\alpha.\tau}&lt;/script&gt;
-
-&lt;p&gt;We need to add the type we expect to obtain from folding to $\textsf{fold}$ to make the typing rules unambiguous:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \;|\; \textsf{unfold}(e) \;|\; \textsf{fold}[\alpha . \tau](e)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\Gamma \vdash e : [\mu\alpha . \tau \;/\; \alpha]\; \tau}
-{\Gamma \vdash \textsf{fold}[\alpha . \tau](e) : \mu\alpha.\tau}&lt;/script&gt;
-
-&lt;p&gt;We can do programming in this language! We apparently don’t have recursion at first glance, but recursive types are actually a conservative extension that will let us do recursion.&lt;/p&gt;
-
-&lt;h3 id=&quot;values-of-mu-alpha--tau&quot;&gt;Values of $\mu \alpha . \tau$&lt;/h3&gt;
-</description>
-        <pubDate>Thu, 05 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/05/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/05/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 8: As You Like It</title>
-        <description>&lt;p&gt;Since we didn’t have class, the professor, Alan Kennedy, posted some notes:&lt;/p&gt;
-
-&lt;h1 id=&quot;where-we-left-off&quot;&gt;Where We Left Off&lt;/h1&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;At the end of last class we were discussing Jaques’ speech about all the world being a stage. We were in the process of dismantling his speech, recognizing that it may be nothing more than a filler while waiting for the return of Orlando with Adam. The negative view of the world that the speech offers is in fact countered by the very positive, generous act of helping an old man. None of Jaques’ stages encounter this kind of selfless act. The speech seems to suggest that there is no variation possible, that the system of 7 ages is rigid and fixed for everybody. Note that none of the characters on stage react to his speech, neither approving it or disapproving. It just runs past them. We left off with the idea that we might look for more flexible ideas of time in the rest of the play. To that end we already have the comments of Touchstone when he pulls out his watch and notes that the world wags on from hour to hour. That too seems a foolish, or perhaps comic or satirical speech. The response to such a speech might be:  Of course. We have also noted that in the Forest of Arden the exiles ‘fleet the time carelessly’, which seems to say that there are different kinds of time, or at least different ways of experiencing it.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h1 id=&quot;whats-jaques-story&quot;&gt;What’s Jaques’ Story?&lt;/h1&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;We read his speech and found it wanting. In what ways? It seemed altogether too negative we said. It looked like filler between Orlando’s leaving and his return with Adam. Orlando’s generosity seemed in direct contradiction to the nihilism of the speech. Too negative, but also consistently negative. So consistent that it begins to look like a fixed attitude, and &lt;em&gt;idee fixe&lt;/em&gt; as it’s sometimes called.&lt;/p&gt;
-
-  &lt;p&gt;Jaques gives the game away when he describes his penchant for melancholy, see p.139 lines 10–15. He thrives on melancholy. On p.115 we learn that the old Duke has a similar condition. He is described as being ‘humourous’. This does not mean he makes jokes and laughs a lot. Just the opposite. It means that he suffers from an excess of the one the four ‘humours’, or fluids in the body (humor as in humid). The four essential bodily fluids needed to be balanced for a condition of health. Too much of one produced an imbalance in the personality. So having too much blood made one sanguine (French sang, for blood), or bloody, given to anger and violence. The 4 fluids are black and yellow bile, phlegm and blood. Having too much phlegm made one phlegmatic, a word we still use. Too much black bile made one melancholic, and that is the nature of Jaques’ personality imbalance. It seems more than that, however, he seems to cultivate his melancholy, to enjoy it, perform it. So he is in the final analysis a person who is not at all flexible by nature. By constitution and by personal choice he has fixated himself on a narrow view of the world. He is like the irrational rulers who fix upon one pattern behavior, exile, and don’t shift positions readily.&lt;/p&gt;
-
-  &lt;p&gt;We could note here that Rosalind does not seem to suffer from this kind of personality fixation. She is very willing to adopt a disguise and pretend to be a man in order to keep things moving along. She remains herself even while disguised.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h1 id=&quot;who-is-flexible&quot;&gt;Who Is Flexible?&lt;/h1&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Well, the exiled have to be, Orlando seems to be, falling back on primal strength, relying on the body alone rather than a fixed social position. If rigidity is to be associated with power, position, then it is likely to be characteristic of men rather than women; women are exiled from power and subject to the whims of ruling males. So Rosalind looks like a key example of flexibility. She hints at one point, however, that flexibility might be available in other ways. When she puts on male costume in Act i, she has to act like a man in order to offer at least symbolic protection to ‘Aliena’–whose very ‘name’ suggests the outcast status. On p. 121 Celia accuses Rosalind of lacking the love “Which teacheth thee that thou and I are one.” that hints at an extreme degree of flexibility in personality, if one person can in fact be another person. it also suggests that there is a kind of love that is not a sickness, not a disaster. Rosalind puts on a pretense of being somebody else when she dons a disguise. On p. 123 she says:&lt;/p&gt;
-
-  &lt;blockquote&gt;
-    &lt;p&gt;We’ll have a swashing and a martial outside,As many other mannish cowards have,&lt;br /&gt;
-That do outface it with their semblances.&lt;/p&gt;
-  &lt;/blockquote&gt;
-
-  &lt;p&gt;She soon begins to show that ‘semblances’, pretenses, might have positive real consequences.&lt;/p&gt;
-
-  &lt;p&gt;On p. 135 she bucks up her courage:&lt;/p&gt;
-
-  &lt;blockquote&gt;
-    &lt;p&gt;But I must comfort the weaker vessel as doublet and hose ought to show itself courageous to petticoat.&lt;/p&gt;
-  &lt;/blockquote&gt;
-
-  &lt;p&gt;She takes courage, that is to say, from the pretense at courage. Which suggests that playing at something might produce that something.&lt;/p&gt;
-
-  &lt;p&gt;And of course it is at a point like this that we remind ourselves that all of Shakespeare’s intent lies in producing semblances, pretenses.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-</description>
-        <pubDate>Thu, 05 Feb 2015 09:00:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/05/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/05/</guid>
         
         
         <category>cmu</category>

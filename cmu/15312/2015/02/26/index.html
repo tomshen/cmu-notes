@@ -6,12 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>15-312 Lecture 13: Modernized Algol</title>
-  <meta name="description" content="$$\newcommand{\m}[1]{\textsf{#1}}\def\ctx{\Gamma}\def\sig{\Sigma}\newcommand\ok[1]{#1~~\m{ok}}\def\natt{\m{nat}}\def\gap{\hspace{1cm}}\def\valt{\m{val}}\newc...">
+  <title>15-312 Lecture 14: Modernized Algol</title>
+  <meta name="description" content="$$\newcommand{\m}[1]{\textsf{#1}}\def\ctx{\Gamma}\def\sig{\Sigma}\newcommand\ok[1]{#1~~\m{ok}}\newcommand\oks[1]{#1~~\m{ok}_{\sig}}\def\natt{\m{nat}}\def\gap...">
 
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:400,400italic|Lora:400,700,400italic,700italic">
   <link rel="stylesheet" href="/notes/css/main.css">
-  <link rel="canonical" href="http://www.tomshen.me/notes/cmu/15312/2015/02/24/">
+  <link rel="canonical" href="http://www.tomshen.me/notes/cmu/15312/2015/02/26/">
   <link rel="alternate" type="application/rss+xml" title="Notes" href="http://www.tomshen.me/notes/feed.xml" />
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
@@ -70,8 +70,8 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">15-312 Lecture 13: Modernized Algol</h1>
-    <p class="post-meta">Feb 24, 2015</p>
+    <h1 class="post-title">15-312 Lecture 14: Modernized Algol</h1>
+    <p class="post-meta">Feb 26, 2015</p>
   </header>
 
   <article class="post-content">
@@ -81,6 +81,7 @@ $$
 \def\ctx{\Gamma}
 \def\sig{\Sigma}
 \newcommand\ok[1]{#1~~\m{ok}}
+\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
 \def\natt{\m{nat}}
 \def\gap{\hspace{1cm}}
 \def\valt{\m{val}}
@@ -94,6 +95,7 @@ $$
 
 \def\prove{\vdash}
 \def\provesig{\prove_{\scriptscriptstyle\sig}}
+\def\provee{\prove_{\emptyset}}
 \newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
 
 \def\cmdt{\m{cmd}}
@@ -105,6 +107,7 @@ $$
 \newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
 
 \newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
+\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
 
 \def\midd{~||~}
 
@@ -125,140 +128,80 @@ $$
 $$
 </div>
 
-<h1 id="imperative-languages">Imperative Languages</h1>
-<p>We’re going to discuss Algol, which inspired Pascal, which inspired C. In particular, we’re going talk about <em>Modernized Algol</em>, which isn’t a real language.</p>
+<h1 id="modernized-algol-continued">Modernized Algol (continued)</h1>
 
-<p><em>Expressions</em> are <em>pure</em>: they have no side effects. Expressions are often referred to as terms.</p>
-
-<p><em>Commands</em> are <em>impure</em>: they may have <em>side effects</em>; they do something to the world. Side effects can involve changes to the store (modifying memory), or input and output. Commands are often referred to as, rather confusingly, expressions.</p>
-
-<h1 id="modernized-algol">Modernized Algol</h1>
-<p>A lot of justifications for why things in this language are the way they are will be by <em>lax logic</em>.</p>
-
-<script type="math/tex; mode=display">% <![CDATA[
-\begin{align}
-\tau & ::= \cdots \mid \cmdt \\
-e & ::= \cdots \mid \cmd{m} \\
-m & ::= \ret{e} \mid \bnd{x}{e}{m} \mid \dcl{a}{e}{m} \mid \get{a} \mid \set{a}{e}
-\end{align} %]]></script>
-
-<p>$m$ is a <em>command</em>. $a$ is an <em>assignable</em>. It’s commonly referred to as a variable, which is incorrect, because it’s not given meaning through substitution.</p>
-
-<p>Note that $\m{bnd}$ is not the same as $\m{let}$. With a $\m{bnd}$ command, once $e$ becomes a value, we know it’s a encapsulated command, so we execute it. With a $\m{let}$ expression, we substitute the value of $e$ in for $x$.</p>
-
-<p>The abstract syntax for some of the commands are:</p>
-
-<script type="math/tex; mode=display">\dcla{e}{a}{m} \gap \geta{a} \gap \seta{a}{e}</script>
-
-<h2 id="static-semantics">Static Semantics</h2>
-
-<script type="math/tex; mode=display">\ctx \provesig e : \tau</script>
-
-<p><script type="math/tex">\sig</script> is a <em>signature</em>. In this language, it is a set of assignables.</p>
+<h2 id="safety">Safety</h2>
 
 <script type="math/tex; mode=display">\frac
-{\ctx, x : \tau \provesig e : \tau'}
-{\ctx \provesig \lambda x : \tau . e : \tau \rightharpoonup \tau'}
-</script>
-
-<script type="math/tex; mode=display">\ctx \provesig \ok{m}</script>
+{\forall a \in \sig . \exists e . \mu(a) = e \wedge \val{e}_{\emptyset} \wedge \prove_{\emptyset} e : \natt}
+{\mu : \sig}</script>
 
 <script type="math/tex; mode=display">\frac
-{\ctx \provesig \ok{m}}
-{\ctx \provesig \cmd{m} : \cmdt}
-</script>
+{\provesig \ok{m} \gap \mu : \sig}
+{m \midd \oks{\mu}}</script>
 
-<script type="math/tex; mode=display">\frac
-{\ctx \provesig e : \natt}
-{\ctx \provesig \ok{\ret{e}}}
-</script>
+<h3 id="progress">Progress</h3>
+<ol>
+  <li>If $\provesig e : \tau$, then either $\vals{e}$ or $e \gts e’$.</li>
+  <li>If $\provesig \ok{m}$, then either $m \midd \final{\mu}$ or $m \midd \mu \gts m’ \midd u’$ and $\mu : \sig$.</li>
+</ol>
 
-<script type="math/tex; mode=display">\frac
-{\ctx \provesig e : \cmdt \gap \Gamma, x : \natt \provesig \ok{m}}
-{\ctx \provesig \ok{\bnd{x}{e}{m}}}
-</script>
+<p>We will consider the $\m{dcl}$ case in the proof of 2.</p>
 
 <script type="math/tex; mode=display">\frac
 {\ctx \provesig e : \natt \gap \ctx \provesigx{a} \ok{m}}
 {\ctx \provesig \dcl{a}{e}{\ok{m}}}</script>
 
-<script type="math/tex; mode=display">\frac
-{a \in \sig}
-{\ctx \provesig \ok{\get{a}}}</script>
+<p>Suppose $\mu : \sig$. We want to show that $\dcl{a}{e}{m \midd \mu}$ or $\exists m’, \mu’ . \dcl{a}{e}{m \midd \mu} \gts m’ \midd \mu’$. By Progress 1 (or, if we’re proving (1) and (2) simultaneously, by the induction hypothesis), $\vals{e}$ or $e \gts e’$.</p>
 
-<script type="math/tex; mode=display">\frac
-{a \in \sig \gap \ctx \provesig e : \natt}
-{\ctx \provesig \ok{\set{a}{e}}}</script>
+<p>Suppose $e \gts e’$. Then, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m \midd \mu}$.</p>
 
-<p>Note that there is an implicit assumption that $a \not\in \sig$. Note also that this assignment is not persistent. In an implementation, $a$ would reside on the stack, and this is commonly referred to as <em>stack discipline</em>.</p>
-
-<h2 id="operational-semantics">Operational Semantics</h2>
-
-<script type="math/tex; mode=display">\vals{e}</script>
-
-<script type="math/tex; mode=display">e \gts e'</script>
-
-<script type="math/tex; mode=display">m \midd \mu \gts m' \midd \mu'</script>
-
-<p><script type="math/tex">\mu</script> is a <em>state</em>, representing memory where assignables are mapped to values. $m$ is a command.</p>
-
-<script type="math/tex; mode=display">\final{m \midd \mu}</script>
-
-<script type="math/tex; mode=display">\frac
-{}{\vals{\cmd{m}}}</script>
-
-<script type="math/tex; mode=display">\frac
-{\vals{e}}
-{\ret{e} \midd \final{\mu}}</script>
-
-<script type="math/tex; mode=display">\frac
-{e \gts e'}
-{\ret{e} \midd \mu \gts \ret{e'} \midd \mu}</script>
-
-<script type="math/tex; mode=display">\frac
-{e \gts e'}
-{\bnd{x}{e}{m} \midd \mu \gts \bnd{x}{e'}{m \midd \mu}}</script>
-
-<script type="math/tex; mode=display">\frac
-{m_1 \midd \mu \gts m_1' \midd \mu'}
-{\bnd{x}{\cmd{m_1}}{m_2} \midd \mu \gts \bnd{x}{\cmd{m_1'}}{m_2} \midd \mu}</script>
-
-<script type="math/tex; mode=display">\frac
-{\vals{e}}
-{\bnd{x}{\cmd{(\ret{e})}}{m} \midd \mu \gts [e/x]~m \midd \mu}</script>
-
-<script type="math/tex; mode=display">\frac
-{e \gts e'}
-{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e'}{m} \midd \mu}</script>
+<p>Suppose $\vals{e}$. Recall that</p>
 
 <script type="math/tex; mode=display">\frac
 {\vals{e} \gap m \midd (\mu, a \hookrightarrow e) \gtsx{a} m' \midd (\mu', a \hookrightarrow e')}
 {\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e'}{m'} \midd \mu'}</script>
 
-<script type="math/tex; mode=display">\frac
-{\vals{e_1} \gap \valsx{e_2}{a}}
-{\dcl{a}{e_1}{\ret{e_2}} \midd \mu \gts \ret{e_2} \midd \mu}</script>
+<p>We claim that $\mu, a \hookrightarrow e : \sig,a$. Note that it is implicit that $a$ is distinct from assignables in $\mu$. We want to show that</p>
 
-<script type="math/tex; mode=display">\frac
-{}
-{\get{a} \midd (\mu, a \hookrightarrow e) \gtsx{a} \ret{e} \midd (\mu, a \hookrightarrow e)}</script>
+<script type="math/tex; mode=display">\exists e' . (\mu, a \hookrightarrow e)(a) = e' \wedge \val{e'}_{\emptyset} \wedge \provee e': \natt</script>
 
-<script type="math/tex; mode=display">\frac
-{e_1 \gtsx{a} e_1'}
-{\set{a}{e} \midd \mu \gts \set{a}{e_1'} \midd \mu}</script>
+<p>It is sufficient to show that <script type="math/tex">\val{e}_{\emptyset} \wedge \provee e : \natt</script>. By canonical forms, <script type="math/tex">e = \bar{n}</script> for some <script type="math/tex">n \in \mathbb{N}</script>. Therefore, <script type="math/tex">\provee \bar{n} : \natt</script> and <script type="math/tex">\val{\bar{n}}_{\emptyset}</script>.</p>
 
-<script type="math/tex; mode=display">\frac
-{\vals{e_1}}
-{\set{a}{e_1} \midd (\mu, a \hookrightarrow e_2) \gts \ret{e_1} \midd (\mu, a \hookrightarrow e_1)}</script>
+<p>Thus, we have shown that $\mu, a \hookrightarrow e : \sig,a$, and we can apply our induction hypothesis.</p>
 
-<h2 id="syntactic-sugar">Syntactic Sugar</h2>
+<p>By the induction hypothesis, either $\finalx{m \midd (\mu, a \hookrightarrow e)}{a}$ or $m \midd (\mu, a \hookrightarrow e) \gtsx{a} m’ \midd \hat{\mu}$. By a lemma (or by preservation), $\hat{\mu} = (\mu’, a \hookrightarrow e’)$.</p>
+
+<p>In the second case, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m’ \midd \mu’}$.</p>
+
+<p>In the first case, by inversion, <script type="math/tex">m = \ret{e'}</script>, where <script type="math/tex">\valsx{e'}{a}</script>. Thus, <script type="math/tex">\dcl{a}{e}{m \midd \mu} \gts m \midd \mu</script>.</p>
+
+<p>Thus, we have proved the $\m{dcl}$ case for Progress.</p>
+
+<h3 id="preservation">Preservation</h3>
+<ol>
+  <li>If <script type="math/tex">\provesig e : \tau</script> and <script type="math/tex">e \gts e'</script>, then <script type="math/tex">\provesig e' : \tau</script>.</li>
+  <li>If <script type="math/tex">\provesig \ok{m}</script>, <script type="math/tex">\mu : \sig</script> and <script type="math/tex">m \midd \mu \gts m' \midd \mu'</script>, then <script type="math/tex">\provesig \ok{m'}</script> and <script type="math/tex">\mu' : \sig</script>.</li>
+</ol>
+
+<p>The proof of Preservation 1 is identical to the proof for Preservation for PCF, except with extra $\sig$s throughout.</p>
+
+<p>The proof of Preservation 2 is by induction on the derivation of <script type="math/tex">m \midd \mu \gts m' \midd \mu'</script>. The $\m{dcl}$ case is proven on p. 331 of <em>PFPL</em>.</p>
+
+<h2 id="extending-the-language">Extending the Language</h2>
 
 <script type="math/tex; mode=display">% <![CDATA[
 \begin{align}
-\bind{x}{m}{m'} & \defeq \bnd{x}{\cmd{m}}{m'} \\
-\do{e} & \defeq \bnd{x}{e}{\ret{x}} \\
-\ifelse{m}{m_1}{m_2} & \defeq \bind{x}{m}{\do{(\ifz{x}{\cmd{m_1}}{\_}{\cmd{m_2}})}}
+\tau & ::= \cdots \mid \cmd{\tau}
 \end{align} %]]></script>
+
+<script type="math/tex; mode=display">\ctx \provesig e : \tau</script>
+
+<script type="math/tex; mode=display">\ctx \provesig m \sim \tau</script>
+
+<script type="math/tex; mode=display">\frac
+{\ctx \provesig m \sim \tau}
+{\ctx \provesig \cmd{m} : \cmd{\tau}}</script>
 
   </article>
 
