@@ -6,9 +6,250 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 03 Mar 2015 10:39:39 -0500</pubDate>
-    <lastBuildDate>Tue, 03 Mar 2015 10:39:39 -0500</lastBuildDate>
+    <pubDate>Tue, 03 Mar 2015 14:48:22 -0500</pubDate>
+    <lastBuildDate>Tue, 03 Mar 2015 14:48:22 -0500</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 15: Benign effects, Mobile Types, References</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\newcommand\ok[1]{#1~~\m{ok}}
+\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
+\def\natt{\m{nat}}
+\def\gap{\hspace{1cm}}
+\def\valt{\m{val}}
+\newcommand\val[1]{#1~\valt}
+\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
+\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
+\def\gt{\mapsto}
+\def\gts{\gt_{\scriptscriptstyle\sig}}
+\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
+\def\defeq{\overset{def}{=}}
+
+\def\prove{\vdash}
+\def\provesig{\prove_{\scriptscriptstyle\sig}}
+\def\provee{\prove_{\emptyset}}
+\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
+
+\def\cmdt{\m{cmd}}
+\newcommand\cmd[1]{\cmdt~(#1)}
+
+\newcommand\ret[1]{\m{ret}~(#1)}
+
+\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
+\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
+
+\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
+\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
+
+\def\midd{~||~}
+
+\newcommand\do[1]{\m{do}~#1}
+
+\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
+\newcommand\while[2]{\m{while}~(#1)~#2}
+
+\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
+\newcommand\fix[3]{\m{fix}~#1:#2~#3}
+
+\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
+\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
+\newcommand\dclt[4]{\m{dcl}_{#1}~#2 := #3~\m{in}~#4}
+
+\newcommand\get[1]{@#1}
+\newcommand\geta[1]{\m{get}[#1]}
+
+\newcommand\set[2]{#1 := #2}
+\newcommand\seta[2]{\m{set}[#1](#2)}
+
+\newcommand\fun[3]{\lambda #1 : #2 . #3}
+
+\def\qquad{~~~~}
+
+\newcommand\mobile[1]{#1~\m{mobile}}
+\def\voidt{\m{void}}
+\def\unitt{\langle \rangle}
+
+\newcommand\reft[1]{\m{ref}(#1)}
+\newcommand\ref[1]{\&amp;amp;#1}
+\newcommand\getref[1]{*#1}
+\newcommand\setref[2]{#1 := #2}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;syntactic-sugar&quot;&gt;Syntactic Sugar&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\{\bind{x}{m_1}{m_2}\} &amp; \defeq \bnd{x}{\cmd{m_1}}{m_2} \\
+\{ m_1 ; m_2 \} &amp; \defeq \{ \bind{\_}{m_1}{m_2} \} \\
+\while{m_1}{m_2} &amp; \defeq \do{(
+    \fix{\m{loop}}
+        {\cmdt}
+        {\cmd{(\ifelse{m_1}
+                      {\ret{\bar{0}}}
+                      {\{m_2 ; \do{\m{loop}}\}}
+        )}}
+)}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;factorial&quot;&gt;Factorial&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;
+\m{fact} \defeq \fun
+{x}
+{\natt}
+{\cmd{(
+    \dcl{r}{1}{\\\dcl{a}{x}{\\ \{\while{\get{a}}{
+    \{ \\
+        \bnd{y}{\get{r}}{\\\bnd{z}{\get{a}}{\\\set{r}{(x-z+\bar{1})*y ; \\\set{a}{z - \bar{1}}}}}
+    \\\}\\
+    }; \get{r}\}}}
+)}} \\
+\m{fact} : \natt \to \cmdt
+&lt;/script&gt;
+
+&lt;h2 id=&quot;benign-effects&quot;&gt;Benign effects&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;Benign effects&lt;/em&gt; do not change the visible state of the program. For $\m{fact}$, we’d like to produce a function with type $\natt \to \natt$. Even though it indeed only has benign effects, we can’t guarantee that. We can’t hide side effects, but we also can’t hide benign effects.&lt;/p&gt;
+
+&lt;p&gt;Haskell is pure because it does not let you hide any effects, including benign ones. So, if there is an effect, it’s in the type (via monads). SML is impure because it lets you hide benign effects, but you can also hide any other effect.&lt;/p&gt;
+
+&lt;h2 id=&quot;extending-the-language&quot;&gt;Extending the Language&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \mid \cmd{\tau} \\
+m &amp; ::= \cdots \mid \dclt{\tau}{a}{e}{m}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Signatures now include types for assignables.&lt;/p&gt;
+
+&lt;h3 id=&quot;proposed-incorrect-type-system&quot;&gt;Proposed (incorrect) type system&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig m \sim \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig m \sim \tau}
+{\ctx \provesig \cmd{m} : \cmd{\tau}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \tau}
+{\ctx \provesig \ret{e} \sim \tau}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \cmd{\tau} \qquad \ctx, x : \tau \provesig m \sim \tau&#39;}
+{\ctx \provesig \bind{x}{e}{m} \sim \tau&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \cmd{\tau} \qquad \ctx, x : \tau \provesig m \sim \tau&#39;}
+{\ctx \provesig \dclt{\tau}{a}{e}{m} \sim \tau&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\ctx \provesigx{a \sim \tau} \get{a} \sim \tau}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesigx{a \sim \tau} e : \tau}
+{\ctx \provesigx{a \sim \tau} \set{a}{e} \sim \tau}&lt;/script&gt;
+
+&lt;p&gt;Why is this incorrect?&lt;/p&gt;
+
+&lt;h3 id=&quot;mobile-types&quot;&gt;Mobile types&lt;/h3&gt;
+
+&lt;p&gt;Consider the program&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcl{a}{\bar{0}}{\ret{\fun{x}{\natt}{\cmd{\set{a}{x}}}}}&lt;/script&gt;
+
+&lt;p&gt;It steps to&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ret{\fun{x}{\natt}{\cmd{\set{a}{x}}}}&lt;/script&gt;
+
+&lt;p&gt;but $a$ is not in scope.&lt;/p&gt;
+
+&lt;p&gt;In the typing judgment for $\m{dcl}$, $\tau’$ needs to be mobile. Alternatively, we can require that the type for $\m{ret}$ must be mobile. Natural numbers are mobile, but functions are not, because they can refer to assignables.&lt;/p&gt;
+
+&lt;p&gt;More precisely, &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt; is &lt;em&gt;mobile&lt;/em&gt; if &lt;script type=&quot;math/tex&quot;&gt;\forall e,\sig . \provesig e : \tau \wedge \vals{e}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\prove_{\emptyset} e : \tau&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{e}_{\emptyset}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Note that if successor for natural numbers ($\m{s}$) is lazy, then natural numbers are &lt;em&gt;not&lt;/em&gt; mobile.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\mobile{\tau_1} \qquad \mobile{\tau_2}}
+{\mobile{\tau_1 + \tau_2}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\voidt}&lt;/script&gt;
+
+&lt;p&gt;The typing rules are still incorrect. Consider the program&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcl{a}{\cmd{\ret{\bar{0}}}}{\dcl{b}{\bar{0}}{\{
+    \set{a}{\cmd{\get{b}}}; \ret \unitt
+\}}}&lt;/script&gt;
+
+&lt;p&gt;Here, assignables are escaping through the store. We need $\tau$ to be mobile as well in the typing judgment for $\m{dcl}$.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;References are a language concept that correspond to the implementation concept pointers. References are not mobile (since they are nothing but assignables).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \cdots \mid \reft{\tau} \\
+e &amp; ::= \cdots \mid \ref{\tau} \\
+m &amp; ::= \cdots \mid \getref{e} \mid \setref{e}{e}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\ctx \provesigx{a \sim \tau} \ref{\tau} : \reft{\tau}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e : \ref{\tau}}
+{\ctx \provesig \getref{e} \sim \tau}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig e_1 : \reft{\tau} \qquad \ctx \provesig e_2 : \tau}
+{\ctx \provesig \setref{e_1}{e_2} : \tau}&lt;/script&gt;
+
+&lt;h3 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\valsx{\ref{a}}{a}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \gts e&#39;}
+{\getref{e} \midd \mu \gts \getref{e&#39;} \midd \mu}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\getref{\ref{a}} \midd \mu \gts \get{a} \midd \mu}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;[for $\setref{e_1}{e_2}$, evaluate $e_1$ and $e_2$]&lt;/em&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e_2}}
+{\setref{\ref{a}}{e_2} \gts \set{a}{e_2} \midd \mu}&lt;/script&gt;
+</description>
+        <pubDate>Tue, 03 Mar 2015 13:28:18 -0500</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/03/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/03/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>76-221 Class 15: Gulliver&#39;s Travels</title>
@@ -970,168 +1211,6 @@ x + (\m{succ}(y)) &amp; = \m{succ}(x+y)
         <pubDate>Thu, 12 Feb 2015 13:30:00 -0500</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/02/12/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/12/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 9: Recursive Types, Objects and Dynamic Dispatch</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$
-\def\self{\sf self\;}
-\def\unroll{\sf unroll\;}
-\def\fold{\sf fold\;}
-\def\unfold{\sf unfold\;}
-\def\fix{\sf fix\;}
-\def\real{\sf real\;}
-\def\bar{\;|\;}
-\def\cart{\sf cart}
-\def\polar{\sf polar}
-\def\dist{\sf dist}
-\def\quadrant{\sf quadrant}
-\def\obj{\sf obj}
-\def\new{\sf new}
-\def\this{\sf this}
-\def\case{\sf case}
-$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;pcf-continued&quot;&gt;PCF (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;recursive-types-continued&quot;&gt;Recursive Types (continued)&lt;/h2&gt;
-
-&lt;h3 id=&quot;self-reference&quot;&gt;Self-reference&lt;/h3&gt;
-&lt;p&gt;Imagine we want to extend the language with a new feature:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-
-\begin{align*}
-\tau ::= &amp; \cdots \bar \self(\tau) \\
-e ::= &amp; \cdots \bar \self[\tau](x.e) \bar unroll(e)
-\end{align*}
- %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;where the first expression is into, and the second elim.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-\frac
-{\Gamma, x : \self(\tau) \vdash : \tau}
-{\Gamma \vdash \self[\tau](x.e) : \self(\tau)}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-\frac
-{\Gamma \vdash e : \self(\tau)}
-{\Gamma \vdash \unroll(e) : \tau}
-&lt;/script&gt;
-
-&lt;p&gt;Actually, we can implement $\self$ and $\unroll$ with existing language constructs:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align*}
-\self(\tau) &amp; \overset{def}{=} \mu\alpha.\alpha \to \tau \\
-\self[\tau](x.e) &amp; \overset{def}{=} \fold[\alpha.\alpha \to \tau](\lambda x : \self(\tau).e) \\
-\unroll(e) &amp; \overset{def}{=} \unfold(e)(e)
-\end{align*} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Note that&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\fix[\tau](x.e) &amp; = \unroll(\self[\tau](y [\unroll y / x]\; e)) \\
-&amp; \overset{*}{\mapsto} [\self[\tau](y [\unroll y / x]\; e) / y][\unroll y / x]\; e \\
-&amp; = [\unroll (\self(y [\unroll y / x]\; e)) / x]\; e \\
-&amp; = [\fix (x.e) / x]\; e
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;In Java and C++ (and similar languages), self-references (e.g. &lt;code&gt;this&lt;/code&gt;) are implemented this way.&lt;/p&gt;
-
-&lt;h1 id=&quot;dynamic-dispatch&quot;&gt;Dynamic Dispatch&lt;/h1&gt;
-&lt;p&gt;This is how we’re doing &lt;em&gt;object-oriented&lt;/em&gt; programming.&lt;/p&gt;
-
-&lt;h2 id=&quot;notation&quot;&gt;Notation&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle e_1, e_2 \rangle, e \cdot l, e \cdot r&lt;/script&gt;
-
-&lt;p&gt;is generalized to&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle l \hookrightarrow e_1, r \hookrightarrow e_2\rangle &lt;/script&gt;
-
-&lt;p&gt;is further generalized to (arbitrary labels)&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\langle x \hookrightarrow e_1, y \hookrightarrow e_2\rangle &lt;/script&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A class is a particular implementation of an abstract type
-    &lt;ul&gt;
-      &lt;li&gt;A class is &lt;em&gt;code&lt;/em&gt;. A class is &lt;strong&gt;not a type&lt;/strong&gt;.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;An instance is a particular such particular \this&lt;/li&gt;
-  &lt;li&gt;Instance data is the data associated with an instance.&lt;/li&gt;
-  &lt;li&gt;An instance type is the type of the instance data, such as $\langle x \hookrightarrow \real, y \hookrightarrow \real \rangle$.&lt;/li&gt;
-  &lt;li&gt;A method is a function on class values&lt;/li&gt;
-  &lt;li&gt;Dispatch is applying a method to an instance&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We define a &lt;em&gt;dispatch matrix&lt;/em&gt;. Let $C$ be the set of classes, and $D$ the set of methods. For every type $\tau$, let $\tau^c$ be the type of $c$’s instance data. Let $\rho_d$ be the type of $d$’s result.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-\prod_{c \in C} \prod_{d \in D} \tau^c \to \rho_d
-&lt;/script&gt;
-
-&lt;h2 id=&quot;example-cartesian-and-polar-points&quot;&gt;Example: Cartesian and Polar Points&lt;/h2&gt;
-
-&lt;p&gt;Let $C = \{\cart, \polar\}$ and $D = \{\dist, \quadrant \}$. Then,&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e^{\cart}_{\dist} = \lambda u : \tau^{\cart} . \sqrt{(u \cdot x)^2 + (u \cdot y)^2}&lt;/script&gt;
-
-&lt;p&gt;We introduce $\obj$, with intro form &lt;script type=&quot;math/tex&quot;&gt;\new[c](e)&lt;/script&gt; and elimination form $e \Leftarrow d$.&lt;/p&gt;
-
-&lt;h2 id=&quot;class-based-organization&quot;&gt;Class-based organization&lt;/h2&gt;
-&lt;p&gt;We have a class vector ($cv$):&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\prod_{c \in C} \tau^c \to \prod_{d \in D} \rho_d&lt;/script&gt;
-
-&lt;p&gt;$\prod_{d \in D} \rho_d$ is the object (\obj).&lt;/p&gt;
-
-&lt;p&gt;Given a class and instance data, return all the methods.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \Leftarrow d \overset{def}{=} e \cdot d&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e^c \overset{def}{=} \lambda u : \tau^c . \langle e_{dm} \cdot c \cdot d(u) \rangle_{d \in D}&lt;/script&gt;
-
-&lt;p&gt;where $dm$ refers to the dispatch matrix.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_{cv} = \langle e \hookrightarrow e^c \rangle_{c \in C}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\new[c](e) = e_{cv} \cdot c(e)&lt;/script&gt;
-
-&lt;h2 id=&quot;method-based-organization&quot;&gt;Method-based organization&lt;/h2&gt;
-&lt;p&gt;We have a method vector ($mv$):&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\prod_{d \in D} \sum_{c \in C} \tau^c \to \rho_d&lt;/script&gt;
-
-&lt;p&gt;$\sum_{c \in C} \tau^c$ is the object.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\new[c](e) \overset{def}{=} c \cdot e&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_d = \lambda \this . (\sum_{c \in C} \tau^c).\case \this \\{
-c \cdot u \Rightarrow e_{dm} \cdot c \cdot d(u) \\} &lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e_{mv} \overset{def}{=} \langle d \hookrightarrow e_d \rangle_{d \in D}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \Rightarrow d \overset{def}{=} e_{mv} \cdot d(e)&lt;/script&gt;
-
-&lt;p&gt;This approach is called “multimethod,” and is used in Cecil and Diesel.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 10 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/10/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/10/</guid>
         
         
         <category>cmu</category>
