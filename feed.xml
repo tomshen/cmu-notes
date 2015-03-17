@@ -6,9 +6,201 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 03 Mar 2015 14:48:22 -0500</pubDate>
-    <lastBuildDate>Tue, 03 Mar 2015 14:48:22 -0500</lastBuildDate>
+    <pubDate>Tue, 17 Mar 2015 14:51:07 -0400</pubDate>
+    <lastBuildDate>Tue, 17 Mar 2015 14:51:07 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 16: Aliasing, Free References, Polymorphism (System F)</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\newcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\newcommand\ok[1]{#1~~\m{ok}}
+\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
+\def\natt{\m{nat}}
+\def\gap{\hspace{1cm}}
+\def\valt{\m{val}}
+\newcommand\val[1]{#1~\valt}
+\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
+\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
+\def\gt{\mapsto}
+\def\gts{\gt_{\scriptscriptstyle\sig}}
+\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
+\def\defeq{\overset{def}{=}}
+
+\def\prove{\vdash}
+\def\provesig{\prove_{\scriptscriptstyle\sig}}
+\def\provee{\prove_{\emptyset}}
+\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
+
+\def\cmdt{\m{cmd}}
+\newcommand\cmd[1]{\cmdt~(#1)}
+
+\newcommand\ret[1]{\m{ret}~(#1)}
+
+\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
+\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
+
+\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
+\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
+
+\def\midd{~||~}
+
+\newcommand\do[1]{\m{do}~#1}
+
+\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
+\newcommand\while[2]{\m{while}~(#1)~#2}
+
+\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
+\newcommand\fix[3]{\m{fix}~#1:#2~#3}
+
+\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
+\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
+\newcommand\dclt[4]{\m{dcl}_{#1}~#2 := #3~\m{in}~#4}
+
+\newcommand\get[1]{@#1}
+\newcommand\geta[1]{\m{get}[#1]}
+
+\newcommand\set[2]{#1 := #2}
+\newcommand\seta[2]{\m{set}[#1](#2)}
+
+\newcommand\fun[3]{\lambda #1 : #2 . #3}
+
+\def\qquad{~~~~}
+
+\newcommand\mobile[1]{#1~\m{mobile}}
+\def\voidt{\m{void}}
+\def\unitt{\langle \rangle}
+
+\newcommand\reft[1]{\m{ref}(#1)}
+\newcommand\ref[1]{\&amp;amp;#1}
+\newcommand\getref[1]{*#1}
+\newcommand\setref[2]{#1 := #2}
+\newcommand\newref[2]{\m{newref}_{#1} #2}
+
+\newcommand\state[3]{\nu (#1) \{ #2 \midd #3 \}}
+\newcommand\statesig[2]{\nu \sig \{ #1 \midd #2 \}}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;references-continued&quot;&gt;References (continued)&lt;/h2&gt;
+
+&lt;h3 id=&quot;aliasing&quot;&gt;Aliasing&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+e \mathrel{+}= e&#39; &amp; \defeq \bind{x}{\getref{e}}{\bind{y}{\getref{e&#39;}}{\setref{e}{(x+y)}}}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Two references that govern the same underlying assignable are said to be &lt;em&gt;aliases&lt;/em&gt;. The possibility of aliasing complicates reasoning about the correctness of code that uses references, for we must always consider for any two references whether or not they might be aliases.&lt;/p&gt;
+
+&lt;h2 id=&quot;free-assignables&quot;&gt;Free Assignables&lt;/h2&gt;
+
+&lt;p&gt;In order to be able to have mutable data structures, we need assignables that can live outside the scopes of their declarations. We call these &lt;em&gt;scope-free&lt;/em&gt; or &lt;em&gt;free&lt;/em&gt; assignables.&lt;/p&gt;
+
+&lt;p&gt;We change &lt;script type=&quot;math/tex&quot;&gt;\m{dcl}&lt;/script&gt; to add assignables to the state.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\statesig{m}{\mu}&lt;/script&gt;
+
+&lt;p&gt;represents a state where the assignables &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu&lt;/script&gt; are bound. &lt;script type=&quot;math/tex&quot;&gt;\nu&lt;/script&gt; is purely for notational purposes.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vals{e}}
+{\statesig{\dclt{\tau}{a}{e}{m}}{\mu} \gt \state{\sig,a \sim \tau}{m}{(\mu, a \hookrightarrow e)}}&lt;/script&gt;
+
+&lt;p&gt;We don’t need a mobility condition for&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \provesig{e : \tau} \qquad \ctx \provesigx{a \sim \tau}{m \sim \tau&#39;}}
+{\ctx \provesig{\dclt{\tau}{a}{e}{m \sim \tau&#39;}}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\newref{\tau}{e} \defeq \dclt{\tau}{a}{e}{\ref{a}}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;[backpatching to implement recursion]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;preservation&quot;&gt;Preservation&lt;/h3&gt;
+
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;\statesig{m}{\mu} \gt \statesig{m&#39;}{\mu&#39;}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\provesig{m \sim \tau}&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\provesig{\mu : \sig}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\prove_{\scriptscriptstyle\sig&#39;} m&#39; \sim \tau&lt;/script&gt;,  &lt;script type=&quot;math/tex&quot;&gt;\prove_{\scriptscriptstyle\sig&#39;} \mu&#39; : \sig&#39;&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\sig&#39;&lt;/script&gt; extends &lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Note that in languages with &lt;script type=&quot;math/tex&quot;&gt;\m{free}&lt;/script&gt; (such as C), it is not always the case that &lt;script type=&quot;math/tex&quot;&gt;\sig&#39;&lt;/script&gt; extends &lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt;. We would need a lot more sophistication in order to have a working type system. Most languages with &lt;script type=&quot;math/tex&quot;&gt;\m{free}&lt;/script&gt; are just broken.&lt;/p&gt;
+
+&lt;h1 id=&quot;polymorphism&quot;&gt;Polymorphism&lt;/h1&gt;
+
+&lt;p&gt;We will be discussing a language called System F, also known as polymorphic lambda calculus. We will have bare type variables.&lt;/p&gt;
+
+&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+
+\def\prove{\vdash}
+
+\renewcommand\fun[3]{\lambda #1 : #2 . #3}
+\renewcommand\Fun[2]{\Lambda #1 . #2}
+
+\def\typet{\m{type}}
+\renewcommand\type[1]{#1~\typet}
+
+\renewcommand\allt[2]{\forall(#1.#2)}
+\renewcommand\App[2]{#1[#2]}
+\renewcommand\subst[3]{[#1 / #2] #3}
+$$
+&lt;/div&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\tau &amp; ::= \alpha \mid \tau \to \tau \mid \allt{\alpha}{\tau} \\
+e &amp; ::= x \mid \fun{x}{\tau}{e} \mid ee \mid \Fun{\alpha}{e} \mid \App{e}{\tau}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Note the lack of explicit product and sum types. System F’s typing is actually more powerful than ML because you can include $\forall$ in types. (ML forces you to have all quantifiers at the beginning of the type, but saves you from having to write them explicitly.)&lt;/p&gt;
+
+&lt;h2 id=&quot;statics&quot;&gt;Statics&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx(x)=\tau}
+{\ctx \prove x : \tau}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;[missing judgements]&lt;/em&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx,\alpha : \typet \prove e : \tau}
+{\ctx \prove \Fun{\alpha}{e} : \allt{\alpha}{\tau}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \prove e : \allt{\alpha}{\tau&#39;} \qquad \ctx \prove \tau : \typet}
+{\ctx \prove \App{e}{\tau} : \subst{\tau}{\alpha}{\tau&#39;}}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;[missing judgements for &lt;script type=&quot;math/tex&quot;&gt;\typet&lt;/script&gt;]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;dynamics&quot;&gt;Dynamics&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;[missing rules for usual evaluation]&lt;/em&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \to e&#39;}
+{\App{e}{\tau} \to \App{e&#39;}{\tau}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\App{(\Fun{\alpha}{e})}{\tau} \to \subst{\tau}{\alpha}{e}}&lt;/script&gt;
+</description>
+        <pubDate>Tue, 17 Mar 2015 13:28:49 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/17/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/17/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 15: Benign effects, Mobile Types, References</title>
@@ -1021,201 +1213,6 @@ e : \dyn \rightharpoonup \dyn &amp; \m{if } c= \fun
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 10: Dynamic Languages</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ok{\m{ok}}
-
-$
-&lt;/div&gt;
-
-&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;dynamic-languages&quot;&gt;Dynamic Languages&lt;/h1&gt;
-
-&lt;h2 id=&quot;dynamic-vs-static-typinglanguages&quot;&gt;Dynamic vs Static Typing/Languages&lt;/h2&gt;
-
-&lt;h3 id=&quot;static-languages&quot;&gt;Static languages&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;ML&lt;/li&gt;
-  &lt;li&gt;Haskell&lt;/li&gt;
-  &lt;li&gt;Java&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;dynamic-languages-1&quot;&gt;Dynamic languages&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Lisp (1960)
-    &lt;ul&gt;
-      &lt;li&gt;The original dynamic language&lt;/li&gt;
-      &lt;li&gt;Racket/Scheme&lt;/li&gt;
-      &lt;li&gt;Clojure&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Python&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;erroneous-ideas&quot;&gt;Erroneous ideas&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;interactive $\iff$ dynamic: There’s no coupling between interactive and dynamic languages. For instance, ML has a REPL, but is still a static language.&lt;/li&gt;
-  &lt;li&gt;Bellman effect: Richard Bellman gave &lt;em&gt;dynamic&lt;/em&gt; programming its name because he though “dynamic” sounded good. Just because something is “dynamic” doesn’t mean it’s better.&lt;/li&gt;
-  &lt;li&gt;Anti-types: Types are an obstacle.&lt;/li&gt;
-  &lt;li&gt;heterogeneity: &lt;code&gt;[1, I, &quot;one&quot;]&lt;/code&gt; is ill-typed in ML. This is held up as an example of the limitations of static typing.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;technical-issues&quot;&gt;Technical issues&lt;/h3&gt;
-&lt;p&gt;Dynamic languages are not opposed to static languages because dynamic languages $\subseteq$ static languages.&lt;/p&gt;
-
-&lt;p&gt;The crucial idea is that untyped languages are &lt;em&gt;uni&lt;/em&gt;typed languages $\approx$ dynamic languages. A dynamic language restricts attention to a &lt;em&gt;single type&lt;/em&gt;. Bob Harper (unsurprisingly) thinks this is a bad idea.&lt;/p&gt;
-
-&lt;p&gt;Surface syntax can be very deceiving. What &lt;code&gt;2 + 3&lt;/code&gt; means in ML is dramatically different from &lt;code&gt;2 + 3&lt;/code&gt; in Python or &lt;code&gt;+ 2 3&lt;/code&gt; in Lisp.&lt;/p&gt;
-
-&lt;h2 id=&quot;dynamic-pcf-dpcf&quot;&gt;Dynamic PCF (DPCF)&lt;/h2&gt;
-&lt;p&gt;It looks like we simply erased type information from programs.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-d &amp; ::= x \\
-&amp; |\; \m{num}[n] \\
-&amp; |\; \m{zero} \\
-&amp; |\; \m{succ}(d) \\
-&amp; |\; \m{ifz}(d, d_0, x.d_1) \\
-&amp; |\; \m{fun}(x.d) &amp; \lambda x.d \\
-&amp; |\; \m{app}(d_1; d_2) &amp; d_1(d_2 )\\
-&amp; |\; \m{fix}(y.d) &amp; \m{fix } x \m{ is } d
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;So, it seems like PCF $=$ DPCF $+$ types.&lt;/p&gt;
-
-&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
-&lt;p&gt;The statics are a little different. Consider&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1\m{ ok},\ldots,x_n\m{ ok} \vdash d\m{ ok}&lt;/script&gt;
-
-&lt;p&gt;which could be written as&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1:\m{ok},\ldots,x_n:\m{ok} \vdash d:\m{ok}&lt;/script&gt;
-
-&lt;p&gt;thus making $\m{ok}$ the one true type, thereby showing untyped DPCF is the same as unityped DPCF. This means that&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{\Gamma,x : \ok \vdash d : \ok}
-{\Gamma \vdash \lambda x.d : \ok}&lt;/script&gt;
-
-&lt;p&gt;Similarly, $\m{zero}(\m{zero}) : \ok$. This is rather unsettling.&lt;/p&gt;
-
-&lt;p&gt;$\m{zero}(\m{zero})$ will fail at runtime instead of at compile time.&lt;/p&gt;
-
-&lt;h3 id=&quot;dynamics&quot;&gt;Dynamics&lt;/h3&gt;
-&lt;p&gt;The dynamics are &lt;em&gt;quite&lt;/em&gt; different. We have our usual&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{cases}
-d \m{ val} \\
-d \mapsto d&#39;
-\end{cases}&lt;/script&gt;
-
-&lt;p&gt;but we also need runtime class checks:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{cases}
-d \m{ err} \\
-d \m{ is_name} \\
-d \m{ isnt_num} \\
-d \m{ is_fun} \\
-d \m{ isnt_fun}
-\end{cases}&lt;/script&gt;
-
-&lt;p&gt;We’ll need to include these in dynamics, as well as propagate any errors that come up. We’ll need the basic rules:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
-{\lambda x.d \;\m{is_fun}\; y.d}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
-{\m{num}[\_] \;\m{isnt_fun}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{}
-{\m{zero} \mapsto \m{num}[0]}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{d\;\m{val} \;\; d \;\m{is_num}\; n}
-{\m{succ}(d) \mapsto \m{num}[n+1]}&lt;/script&gt;
-
-&lt;p&gt;(This is why we needed to include $\m{num}[n]$ in our language.)&lt;/p&gt;
-
-&lt;p&gt;Thus, when we compile down to machine code, we’ll need to store type information as well. This costs space (to store types) and time (to check types).&lt;/p&gt;
-
-&lt;p&gt;In ML, &lt;code&gt;2 + 3&lt;/code&gt; compiles down to a register holding &lt;code&gt;2&lt;/code&gt;, a register holding &lt;code&gt;3&lt;/code&gt;, and an adding operation. In a DPCF, &lt;code&gt;2 + 3&lt;/code&gt; compiles down to memory holding &lt;code&gt;num&lt;/code&gt; and &lt;code&gt;2&lt;/code&gt;, memory holding &lt;code&gt;num&lt;/code&gt; and &lt;code&gt;3&lt;/code&gt;, and operations to not just add &lt;code&gt;2&lt;/code&gt; and &lt;code&gt;3&lt;/code&gt;, but check the two types are the same and store that type with &lt;code&gt;5&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The formalisms behind a dynamic language &lt;em&gt;force&lt;/em&gt; a less efficient implementation. And, this overhead (which is already substantial for such a simple language) increases even more as the language becomes more complex.&lt;/p&gt;
-
-&lt;h3 id=&quot;type-safety&quot;&gt;Type safety&lt;/h3&gt;
-&lt;p&gt;One of the oft-touted benefits of dynamic languages is that your program will never fail to compile due to type checking.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Aside: ML’s error messages are terrible because it sets up a set of simultaneous equations and attempts to solve them with a system similar to Gaussian elimination. There’s no easy way to turn that into a good error message.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;em&gt;Theorem.&lt;/em&gt; DPCF is type-safe.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Proof.&lt;/em&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Preservation: trivial, since $d : \ok \mapsto d’ : \ok$ (“anything goes”)&lt;/li&gt;
-  &lt;li&gt;Progress: if $d : \ok$, then either
-    &lt;ul&gt;
-      &lt;li&gt;$d \m{ val}$&lt;/li&gt;
-      &lt;li&gt;$d \m{ err}$&lt;/li&gt;
-      &lt;li&gt;$\exists d’ : \ok . d \mapsto d’$&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\square&lt;/script&gt;
-
-&lt;h3 id=&quot;addition-in-dpcf&quot;&gt;Addition in DPCF&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-x + 0 &amp; = x \\
-x + (\m{succ}(y)) &amp; = \m{succ}(x+y)
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{fun}(x . \m{fix} (p . \m{fun} (y . \m{ifz} (y;x;y&#39;. \m{succ}(\m{app}(p; y&#39;))))))&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\lambda(x) . \m{fix} \;p \m{ is } \lambda(y) \m{ifz} \{ \m{zero} \hookrightarrow x \;|\; \m{succ}(y&#39;) \hookrightarrow \m{succ}(p(y&#39;)) \}&lt;/script&gt;
-
-&lt;p&gt;Despite looking a lot like addition would in PCF,&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;We have to check $\m{is_fun}\;p$ every recursive call of $p$ despite the fact that $p$ cannot be anything but a function. If we allowed unchecked function calls here, we’d have to allow it in situations where it would not be appropriate, like $\lambda f . f(\m{zero})$.&lt;/li&gt;
-  &lt;li&gt;We have to check $\m{is_num}\; p(y’)$ every recursive call for $\m{succ}$.&lt;/li&gt;
-  &lt;li&gt;We have to check $\m{is_num}\; y$ every recursive call for $\m{ifz}$.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Thus, this will be a lot slower than the same function in PCF.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Aside: If you wrote $\m{add}$ as a multi-argument function, we’re already introducing typing in the form of light pattern matching, since $\lambda(x,y)$ takes in $\langle \ok, \ok \rangle$ as an argument.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-&lt;p&gt;Structural operational semantics and type systems are extremely useful for understanding programming languages, especially when coupled with machine-checked proofs (e.g. Twelf).&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Aside: A machine-checked proof ($\approx$ 30k lines of Twelf) was written in a couple weeks that proves the type safety of Standard ML.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;It’s far too complicated to prove the type safety of dynamic languages.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 12 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/12/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/12/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
