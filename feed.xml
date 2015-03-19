@@ -6,9 +6,164 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 17 Mar 2015 14:51:07 -0400</pubDate>
-    <lastBuildDate>Tue, 17 Mar 2015 14:51:07 -0400</lastBuildDate>
+    <pubDate>Thu, 19 Mar 2015 14:44:23 -0400</pubDate>
+    <lastBuildDate>Thu, 19 Mar 2015 14:44:23 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 17: Polymorphism</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\t{\tau}
+
+\def\natt{\m{nat}}
+\def\boolt{\m{bool}}
+\def\unitt{\m{unit}}
+\def\voidt{\m{void}}
+
+\def\unit{\langle \rangle}
+
+\def\prove{\vdash}
+
+\renewcommand\fun[3]{\lambda #1 : #2 . #3}
+\renewcommand\Fun[2]{\Lambda #1 . #2}
+
+\def\typet{\m{type}}
+\renewcommand\type[1]{#1~\typet}
+
+\renewcommand\allt[2]{\forall(#1.#2)}
+\renewcommand\prodt[2]{#1 \times #2}
+\renewcommand\pair[2]{\langle #1, #2 \rangle}
+\renewcommand\App[2]{#1[#2]}
+\renewcommand\subst[3]{[#1 / #2] #3}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;polymorphism-continued&quot;&gt;Polymorphism (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;type-safety&quot;&gt;Type Safety&lt;/h2&gt;
+
+&lt;p&gt;Preservation and progress do hold. See &lt;em&gt;PFPL&lt;/em&gt; for more details.&lt;/p&gt;
+
+&lt;p&gt;To prove preservation for&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{}
+{\App{(\Fun{\alpha}{e})}{\tau} \to \subst{\tau}{\alpha}{e}}&lt;/script&gt;
+
+&lt;p&gt;we need a substitution lemma (type substitution).&lt;/p&gt;
+
+&lt;h2 id=&quot;language-constructs&quot;&gt;Language Constructs&lt;/h2&gt;
+
+&lt;p&gt;Recall natural numbers from the untyped lambda calculus:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{0} = \lambda z . \lambda s . z&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\overline{n+1} = \lambda z . \lambda s . s ~ (\bar{n} ~ z ~ s)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\natt: b \to (b \to b) \to b&lt;/script&gt;
+
+&lt;p&gt;We need to fix $b$ to be a specific type, which works in an untyped language (type is just &lt;script type=&quot;math/tex&quot;&gt;\m{dyn}&lt;/script&gt;) but not in the typed lambda calculus.&lt;/p&gt;
+
+&lt;p&gt;With polymorphism, we can make this work:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\natt &amp; = \allt{\alpha}{\alpha \to (\alpha \to \alpha) \to \alpha} \\
+\bar{0} &amp; = \Fun{\alpha}{\fun{z}{\alpha}{\fun{s}{\alpha \to \alpha}{z}}} \\
+\overline{n+1} &amp; = \Fun{\alpha}{\fun{z}{\alpha}{\fun{s}{\alpha \to \alpha}{s~(\App{\bar{n}}{\alpha}~z~s)}}} \\
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We can also implement other constructs we’ve seen in this class:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\boolt &amp; = \allt{\alpha}{\alpha \to \alpha \to \a} \\
+\overline{\m{true}} &amp; = \Fun{\alpha}{\fun{x}{\a}{\fun{y}{\a}{x}}}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\prod{\tau_1}{\tau_2} &amp; = \allt{\a}{(\tau_1 \to \tau_2 \to \a) \to \a} \\
+\overline{\pair{e}{e&#39;}} &amp; = \Fun{\a}{\fun{f}{\t_1 \to \t_2 \to \a}{f~e~e&#39;}} \\
+\m{outl}_{\t_1,t_2}~e &amp; = \App{e}{\t_1}(\fun{x}{\t_1}{\fun{y}{\t_2}{x}})
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;System-F also has sum types, though it does &lt;em&gt;not&lt;/em&gt; have recursive types, because all programs terminate.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\unitt &amp; = \allt{\a}{\a \to \a} \\
+\overline{\unit} &amp; = \Fun{\a}{\fun{x}{\a}{x}} \\
+\voidt &amp; = \allt{\a}{\a} \\
+\overline{\m{abort}_\t~e} &amp; = \App{e}{\t}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;natural-numbers&quot;&gt;Natural Numbers&lt;/h2&gt;
+&lt;p&gt;We claim that our definition of natural numbers &lt;em&gt;are the natural numbers&lt;/em&gt;: there is nothing else in the type. Similarly, for &lt;script type=&quot;math/tex&quot;&gt;\unitt&lt;/script&gt;, if &lt;script type=&quot;math/tex&quot;&gt;e : \unitt&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;e \cong \Fun{\a}{\fun{x}{\a}{x}}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Proving this rigorously takes an additional semester of math. But, in short, this proof relies on &lt;em&gt;parametricity&lt;/em&gt;. Since we can’t branch on type, we have parametric polymorphism. Consider&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \cong \Fun{\alpha}{\fun{x}{\a}{\_}}&lt;/script&gt;
+
+&lt;p&gt;Because we can’t branch on &lt;script type=&quot;math/tex&quot;&gt;\a&lt;/script&gt;, and because $\a$ is unknown, the only way to produce a value of type &lt;script type=&quot;math/tex&quot;&gt;\a&lt;/script&gt; is to fill in the blank with &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;If the language allowed for non-terminating programs (recursion), then for &lt;script type=&quot;math/tex&quot;&gt;e&lt;/script&gt; to have type &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;e \cong \bot&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\Fun{\a}{\bot}&lt;/script&gt;, or &lt;script type=&quot;math/tex&quot;&gt;\Fun{\alpha}{\fun{x}{\a}{\bot}}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;The Parametricity Theorem is also called the Abstraction Theorem, which is an important part of modular programming. It basically says that we can have a program composed of separate pieces that can possibly work.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Crary claims that the Abstraction Theorem is the most important theorem in computer science.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;impredicative-types&quot;&gt;Impredicative Types&lt;/h2&gt;
+
+&lt;p&gt;In &lt;script type=&quot;math/tex&quot;&gt;\allt{\a}{\t}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\a&lt;/script&gt; ranges over a collection (possibly not a set) of types that includes &lt;script type=&quot;math/tex&quot;&gt;\allt{\a}{\t}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;In ML, we have &lt;em&gt;predicative&lt;/em&gt; types. There are monotypes (&lt;script type=&quot;math/tex&quot;&gt;\tau ::= \a \mid \t \to \t&lt;/script&gt;) and polytypes (&lt;script type=&quot;math/tex&quot;&gt;\sigma ::= \t \mid \allt{\a}{\sigma}&lt;/script&gt;). Note that the &lt;script type=&quot;math/tex&quot;&gt;\forall&lt;/script&gt; ranges over monotypes, not polytypes. This lets ML hide all quanitifies, and it uses prenex quantification to put all the quantifies at the front of the type.&lt;/p&gt;
+
+&lt;h2 id=&quot;value-restriction&quot;&gt;Value Restriction&lt;/h2&gt;
+&lt;p&gt;[&lt;em&gt;I’m not sure I understand this explanation.&lt;/em&gt;]&lt;/p&gt;
+
+&lt;p&gt;Why does ML blow up if you have &lt;code&gt;val x = rev nil&lt;/code&gt;?&lt;/p&gt;
+
+&lt;p&gt;Consider&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;val x = (print &quot;hello&quot;; nil)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we let this have the type &lt;code&gt;&#39;a list&lt;/code&gt;, then &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; would be a value. Whenever &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; is used, “hello” will be printed. Thus, we can introduce unexpected side effects to our program.&lt;/p&gt;
+
+&lt;p&gt;This is commonly, &lt;em&gt;incorrectly&lt;/em&gt; believed to be to preserve type safety. (For what it’s worth, &lt;a href=&quot;http://mlton.org/ValueRestriction&quot;&gt;MLTon claims this&lt;/a&gt;.) The concern is&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;val r = ref NONE;
+val () = r := SOME 12;
+val x = case !(r : (int -&amp;gt; int) option ref) of
+            NONE =&amp;gt; ...
+          | SOME f =&amp;gt; f 0;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In fact, a new reference &lt;script type=&quot;math/tex&quot;&gt;r&lt;/script&gt; is being generated each time, so while the behavior is unexpected, it does not break type safety. The reason it’s believed this breaks type safety is that it’s incorrectly believed there should be a rule&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapsto e&#39;}
+{\Fun{\a}{e} \mapsto \Fun{\a}{e&#39;}}&lt;/script&gt;
+</description>
+        <pubDate>Thu, 19 Mar 2015 13:30:50 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/19/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/19/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 16: Aliasing, Free References, Polymorphism (System F)</title>
@@ -1167,52 +1322,6 @@ e : \dyn \rightharpoonup \dyn &amp; \m{if } c= \fun
         <category>cmu</category>
         
         <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 11: Gulliver&#39;s Travels</title>
-        <description>&lt;p&gt;The prevailing idea of what it means to be a person at the time &lt;em&gt;Gulliver’s Travels&lt;/em&gt; was written was:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;chain of being: God to angels to humans (rational animals)&lt;/li&gt;
-  &lt;li&gt;hierarchy&lt;/li&gt;
-  &lt;li&gt;animals are without spirit or reason&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Is Gulliver a rational animal? We can consider him rational because he’s clearly a thinking being. But, we can also consider him an animal, and sometimes even irrational:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;talks about “making water” (p. 27)&lt;/li&gt;
-  &lt;li&gt;traveling repeatedly despite the trouble he always runs into&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Compare &lt;em&gt;Gulliver’s Travels&lt;/em&gt; to the &lt;em&gt;Odyssey&lt;/em&gt;:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;emphasis on travel versus homecoming&lt;/li&gt;
-  &lt;li&gt;hospitality
-    &lt;ul&gt;
-      &lt;li&gt;because strangers may be gods in the &lt;em&gt;Odyssey&lt;/em&gt;&lt;/li&gt;
-      &lt;li&gt;why is hospitality so common in &lt;em&gt;Gulliver’s Travels&lt;/em&gt;?&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Cross-culture assimilation is part of human nature. But Gulliver takes it perhaps too far: he pretends to be a Lilliputian, and looks down on nobles of lower rank in their society. When he “makes water,” he sees it from their perspective: as a “torrent.”&lt;/p&gt;
-
-&lt;p&gt;Violence is very much a part of Gulliver’s society, at least directed at smaller beings. He thinks nothing of dashing small animals against the ground. But, honor holds him back from doing so to the similarly small Lilliputians: assimilation!&lt;/p&gt;
-
-&lt;p&gt;Is Gulliver a reliable narrator? While reading, it is easy for us to “believe in” the Lilliputians. &lt;/p&gt;
-</description>
-        <pubDate>Tue, 17 Feb 2015 00:09:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/17/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/17/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
         
       </item>
     
