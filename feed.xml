@@ -6,9 +6,148 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 19 Mar 2015 14:44:23 -0400</pubDate>
-    <lastBuildDate>Thu, 19 Mar 2015 14:44:23 -0400</lastBuildDate>
+    <pubDate>Tue, 24 Mar 2015 14:45:06 -0400</pubDate>
+    <lastBuildDate>Tue, 24 Mar 2015 14:45:06 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 18: Representation Independence</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+
+\def\natt{\m{nat}}
+\def\boolt{\m{bool}}
+\def\unitt{\m{unit}}
+\def\voidt{\m{void}}
+
+\def\unit{\langle \rangle}
+
+\def\tt{\m{true}}
+\def\ff{\m{false}}
+
+\def\prove{\vdash}
+
+\renewcommand\fun[3]{\lambda #1 : #2 . #3}
+\renewcommand\Fun[2]{\Lambda #1 . #2}
+
+\def\typet{\m{type}}
+\renewcommand\type[1]{#1 : \typet}
+
+\renewcommand\allt[2]{\forall #1.#2}
+\renewcommand\prodt[2]{#1 \times #2}
+\renewcommand\pair[2]{\langle #1, #2 \rangle}
+\renewcommand\App[2]{#1[#2]}
+\renewcommand\subst[3]{[#1 / #2] #3}
+
+\renewcommand\existst[2]{\exists #1.#2}
+\renewcommand\pack[4]{\m{pack}~[#1,#2]~\m{as}~\exists #3.#4}
+\renewcommand\open[4]{\m{open}~[#1,#2] = #3~\m{in}~#4}
+
+\def\defeq{\overset{def}{=}}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;polymorphism-continued&quot;&gt;Polymorphism (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;data-asbstraction--existential-types&quot;&gt;Data asbstraction / existential types&lt;/h2&gt;
+
+&lt;p&gt;An existential type is of the form&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\existst{\a}{\t}&lt;/script&gt;
+
+&lt;p&gt;This forces us to be parametric on &lt;script type=&quot;math/tex&quot;&gt;\a&lt;/script&gt;. We introduce&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\pack{\t}{e}{\a}{\t&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\open{\a}{x}{e}{e&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx\prove \type{\t} \qquad \ctx\prove e : \subst{\t}{\a}{\t&#39;} \qquad \ctx,\type{\a} \prove \type{\t&#39;}}
+{\ctx \prove \pack{\t}{e}{\a}{\t&#39;} : \existst{\a}{\t&#39;}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \prove e_1 : \existst{\a}{\t} \qquad \ctx, \type{\a}, x : \t \prove e_2 : \t&#39; \qquad \ctx \prove \type{\t&#39;}}
+{\ctx \prove \open{\a}{x}{e_1}{e_2} : \t&#39;}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;{\tt
+sig \\
+  type~\tau \\
+  val~init : \tau \\
+  val~flip : t \to \tau \\
+  val~out : t \to \m{bool} \\
+end
+}&lt;/script&gt;
+
+&lt;p&gt;We actually don’t need explicit existential types, because we can implement them in terms of universal types.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\existst{\a}{\t} &amp; \defeq \allt{\b}{(\allt{\a}{\t \to \b}) \to \b} \\
+\pack{\t}{e}{\a}{\t&#39;} &amp; \defeq \Fun{\b}{\fun{f}{(\allt{\a}{\t&#39; \to \b})}{f~\t~e}} \\
+\open{\a}{x}{e_1}{e_2} &amp; \defeq \App{e_1}{\t&#39;}(\Fun{\a}{\fun{x}{\tau}{e_2}})
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;representation-independence--abstraction-theoremhttpwwwandrewcmueducourse15-312notesmar-20pdf&quot;&gt;&lt;a href=&quot;http://www.andrew.cmu.edu/course/15-312/notes/mar-20.pdf&quot;&gt;Representation Independence / Abstraction Theorem&lt;/a&gt;&lt;/h2&gt;
+
+&lt;h3 id=&quot;equivalence&quot;&gt;Equivalence&lt;/h3&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-equivalence is when two terms are exactly the same, except for variable names. This is the strictest form of equivalence.&lt;/p&gt;
+
+&lt;p&gt;Trivial equivalence is when everything is said to be equivalent. This is pretty useless.&lt;/p&gt;
+
+&lt;p&gt;We will discuss &lt;em&gt;contexual&lt;/em&gt; and &lt;em&gt;logical&lt;/em&gt; equivalence, which are the same.&lt;/p&gt;
+
+&lt;p&gt;Two terms are contextually equivalent if any program we embed those terms into cannot tell the difference between the two terms. This is pretty well motivated–we want to know if this is the case all the time. However, it’s hard to work with, since in theory, to show it, we have to check all possible inputs.&lt;/p&gt;
+
+&lt;p&gt;Contexual: &lt;script type=&quot;math/tex&quot;&gt;e \cong e&#39; : \t&lt;/script&gt;&lt;br /&gt;
+Logical: &lt;script type=&quot;math/tex&quot;&gt;e \sim e&#39; : \t&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;(Special case of) Reynold’s Abstraction Theorem: If &lt;script type=&quot;math/tex&quot;&gt;\prove e : \t&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;e \sim e : \t&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Logical relation:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+e \sim e&#39; : \boolt &amp; \iff (e \mapsto^* \tt \wedge e&#39; \mapsto^* \tt) \vee (e \mapsto^* \ff \wedge e&#39; \mapsto^* \ff) \\
+e \sim e&#39; : \unitt &amp; \iff \m{yes} \\
+e \sim e&#39; : \natt &amp; \iff \exists n . e \mapsto^* \bar{n} \wedge e&#39; \mapsto \bar{n} \\
+e \sim e&#39; : \t_1 \to \t_2 &amp; \iff \forall v, v&#39; . \m{if}~v \sim v&#39; : \t_1, \m{then}~e~v\sim e&#39;~v&#39; : \t_2 \\
+e \sim e&#39; : \t_1 \times \t_2 &amp; \iff e \cdot l \sim e&#39; \cdot l : \tau_1 \vee e \cdot r \sim e&#39; \cdot r : \t_2 \\
+e \sim e&#39; : \allt{\a}{\t} &amp; \iff \forall \t_1, \t_2 . \forall R : \t_1 \leftrightarrow \t_2 . \App{e}{\t_1} \sim \App{e&#39;}{\t_2} : \subst{R}{\a}{\t} \\
+e \sim e&#39; : R &amp; \iff e~R~e&#39;
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We’re using quasi-types:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;q ::= \boolt \mid \natt \mid \unitt \mid q \to q \mid q \times q \mid \allt{\a}{q} \mid R&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;R \subseteq \{ e\mid e : \t_1 \} \times \{ e \mid e : \t_2 \}&lt;/script&gt;
+
+&lt;p&gt;such that &lt;script type=&quot;math/tex&quot;&gt;R&lt;/script&gt; is closed under equivalence. Thus, reflexivity is no longer obvious, which makes the abstraction theorem so useful.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;M_1 = \pack{\boolt}{\pair{\ff}{\pair{\natt}{\lambda x . x}}}{\a}{\a \times (\a \to \a) \times \a \to \boolt}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;M_2 = \pack{\natt}{\pair{\bar{0}}{\pair{\m{succ}}{\m{odd?}}}}{\a}{\a \times (\a \to \a) \times \a \to \boolt}&lt;/script&gt;
+
+&lt;p&gt;We can prove that &lt;script type=&quot;math/tex&quot;&gt;M_1 \sim M_2 : \existst{\a}{\a \times (\a \to \a) \times \a \to \boolt}.&lt;/script&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 24 Mar 2015 13:27:21 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/24/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/24/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 17: Polymorphism</title>
@@ -1221,102 +1360,6 @@ u \cdot r &amp; \defeq u \; (\lambda x . \lambda y . y)
         <pubDate>Thu, 19 Feb 2015 13:30:00 -0500</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/02/19/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/19/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 11: Dynamic Languages as Typed Languages</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ok{\m{ok}}
-\def\num{\m{num}}
-\def\fun{\m{fun}}
-\def\dyn{\m{dyn}}
-\def\nat{\m{nat}}
-\def\new{\m{new}}
-\def\cast{\m{cast}}
-\def\err{\m{ err}}
-\def\inst{\m{inst}}
-\def\bool{\m{bool}}
-\def\true{\m{true}}
-\def\false{\m{false}}
-$$
-&lt;/div&gt;
-
-&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;dpcf-continued&quot;&gt;DPCF (continued)&lt;/h1&gt;
-&lt;p&gt;Recall that DPCF is “dynamic PCF” (looks like PCF without types). There are two classes of values:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;numbers $\num[n]$, where $\num$ is a class of numbers&lt;/li&gt;
-  &lt;li&gt;functions $\fun(x.d)$, where $\fun$ is a class of functions&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Recall that classes are not types. So, the classes are $\num$ and $\fun$, but both their types are $\ok$. So, while dynamic languages are often said to have “runtime type checking,” this is not quite correct. What we actually have is runtime &lt;em&gt;class&lt;/em&gt; checking:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;$d \m{ is_num } n$.&lt;/li&gt;
-  &lt;li&gt;$d \m{ is_fun } x.d’$.&lt;/li&gt;
-  &lt;li&gt;$d \m{ isnt_num}$.&lt;/li&gt;
-  &lt;li&gt;$d \m{ isnt_fun}$.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;which requires space, requires time, and can fail.&lt;/p&gt;
-
-&lt;h1 id=&quot;hybrid-pcf&quot;&gt;Hybrid PCF&lt;/h1&gt;
-&lt;p&gt;We can define a hybrid PCF as PCF $+$ $\dyn$, which is a subset of $FPC$ with recursive types. This lets us have “dynamic” typing while still being able to perform program transformations.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \nat \mid \tau_1 \rightharpoonup \tau_2 \mid \dyn&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\new[c](e) : \dyn \m{ if } \begin{cases}
-e : \nat &amp; \m{if } c = \num \\
-e : \dyn \rightharpoonup \dyn &amp; \m{if } c= \fun
-\end{cases} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\new[\num](7) : \dyn&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\num[\fun](7)\;X&lt;/script&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\cast[c](e) : \begin{cases}
-\nat &amp; \m{if } c = \num \\
-\dyn \rightharpoonup \dyn &amp; \m{if } c = \fun
-\end{cases} \text{ where $e : \dyn$} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\cast[\fun](\new[\num](\_))\err&lt;/script&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inst[c](e) : \bool \text{ where $e : \dyn$}&lt;/script&gt;
-
-&lt;p&gt;e.g. &lt;script type=&quot;math/tex&quot;&gt;\inst[\num](\new[\num](\_)) = \true&lt;/script&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that if&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1 : \ok, \ldots, x_n : \ok \vdash_{DPCF} d : \ok&lt;/script&gt;
-
-&lt;p&gt;then&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;x_1 : \dyn,\ldots,x_n : \dyn \vdash_{HPCF} d^+ : \dyn&lt;/script&gt;
-
-&lt;p&gt;and the behavior is preserved.&lt;/p&gt;
-
-&lt;p&gt;Ultimately, it makes much more sense to use a static language with type inference than a dynamic language. In either case, you can write code without explicit types. But with the static language, the compiler can perform transformations and guarantee (useful) type safety.&lt;/p&gt;
-
-&lt;h1 id=&quot;dpcf-subseteq-hpcf-subseteq-fpc&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;DPCF \subseteq HPCF \subseteq FPC&lt;/script&gt;&lt;/h1&gt;
-&lt;p&gt;(dynamic typing $\subseteq$ static typing $\subseteq$ FPC)&lt;/p&gt;
-
-&lt;p&gt;Dynamic typing is not in opposition to static typing, because it is a subset of static typing. However, HPCF is an entirely artificial construct. It’s simply a way to show the power of FPC. FPC has many other useful features.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;FPC = \lambda \{ 0 ~ 1 + \times \to \mu \}&lt;/script&gt;
-</description>
-        <pubDate>Tue, 17 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/17/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/17/</guid>
         
         
         <category>cmu</category>
