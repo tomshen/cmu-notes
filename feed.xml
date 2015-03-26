@@ -6,12 +6,176 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 24 Mar 2015 14:45:06 -0400</pubDate>
-    <lastBuildDate>Tue, 24 Mar 2015 14:45:06 -0400</lastBuildDate>
+    <pubDate>Thu, 26 Mar 2015 14:50:21 -0400</pubDate>
+    <lastBuildDate>Thu, 26 Mar 2015 14:50:21 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
-        <title>15-312 Lecture 18: Representation Independence</title>
+        <title>15-312 Lecture 19: Representation Independence, Parallelism</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+
+\def\natt{\m{nat}}
+\def\boolt{\m{bool}}
+\def\unitt{\m{unit}}
+\def\voidt{\m{void}}
+
+\def\unit{\langle \rangle}
+
+\def\tt{\m{true}}
+\def\ff{\m{false}}
+
+\def\prove{\vdash}
+
+\renewcommand\fun[3]{\lambda #1 : #2 . #3}
+\renewcommand\Fun[2]{\Lambda #1 . #2}
+
+\def\typet{\m{type}}
+\renewcommand\type[1]{#1 : \typet}
+
+\renewcommand\allt[2]{\forall #1.#2}
+\renewcommand\prodt[2]{#1 \times #2}
+\renewcommand\pair[2]{\langle #1, #2 \rangle}
+\renewcommand\App[2]{#1[#2]}
+\renewcommand\subst[3]{[#1 / #2] #3}
+
+\renewcommand\existst[2]{\exists #1.#2}
+\renewcommand\pack[4]{\m{pack}~[#1,#2]~\m{as}~\exists #3.#4}
+\renewcommand\open[4]{\m{open}~[#1,#2] = #3~\m{in}~#4}
+
+\def\defeq{\overset{def}{=}}
+
+\renewcommand\par[5]{\m{par}~#1=#2 \m{ and } #3=#4 \m{ in } #5}
+\renewcommand\val[1]{#1~\m{val}}
+\def\mapstos{\mapsto_{\m{seq}}}
+\def\mapstop{\mapsto_{\m{par}}}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;representation-independence--abstraction-theoremhttpwwwandrewcmueducourse15-312notesmar-20pdf-continued&quot;&gt;&lt;a href=&quot;http://www.andrew.cmu.edu/course/15-312/notes/mar-20.pdf&quot;&gt;Representation Independence / Abstraction Theorem&lt;/a&gt; (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;equivalence-continued&quot;&gt;Equivalence (continued)&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Lemma&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;M,M&#39; : \exists{\a}{\t}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;M = \pack{\sigma}{e}{\a}{\t}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;M&#39; = \pack{\sigma&#39;}{e&#39;}{\a}{\t}&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;R : \sigma \to \sigma&#39;&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;R&lt;/script&gt; is closed under equivalence and &lt;script type=&quot;math/tex&quot;&gt;e \sim e&#39; : \subst{R}{\a}{\t}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;M \sim M&#39; : \existst{\a}{\t}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Proof&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Suppose &lt;script type=&quot;math/tex&quot;&gt;M,M&#39; : \exists{\a}{\t}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;M = \pack{\sigma}{e}{\a}{\t}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;M&#39; = \pack{\sigma&#39;}{e&#39;}{\a}{\t}&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;R : \sigma \to \sigma&#39;&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;R&lt;/script&gt; is closed under equivalence and &lt;script type=&quot;math/tex&quot;&gt;e \sim e&#39; : \subst{R}{\a}{\t}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We want to show that &lt;script type=&quot;math/tex&quot;&gt;M \sim M&#39; : \allt{\beta}{(\allt{\a}{\t \to \b}) \to \b}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Suppose &lt;script type=&quot;math/tex&quot;&gt;\rho, \rho&#39; : \typet&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;Q : \rho \leftrightarrow \rho&#39;&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;Q&lt;/script&gt; is closed under equivalence.&lt;/p&gt;
+
+&lt;p&gt;We want to show &lt;script type=&quot;math/tex&quot;&gt;\App{M}{\rho} \sim \App{M&#39;}{\rho&#39;} : (\allt{\a}{\t \to Q}) \to Q&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Suppose &lt;script type=&quot;math/tex&quot;&gt;f \sim f&#39; : \allt{\a}{\t \to Q}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We want to show &lt;script type=&quot;math/tex&quot;&gt;\App{M}{\rho}f \sim \App{M&#39;}{\rho&#39;}f&#39; : Q&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We want to show that &lt;script type=&quot;math/tex&quot;&gt;\App{M}{\rho}f~~Q~~\App{M&#39;}{\rho&#39;}f&#39;&lt;/script&gt;.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\App{(\Fun{\b}{\lambda g . \App{g}{\sigma}e})}{\rho}f \mapsto^* \App{f}{\sigma}e&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\App{(\Fun{\b}{\lambda g . \App{g}{\sigma&#39;}e&#39;})}{\rho&#39;}f&#39; \mapsto^* \App{f&#39;}{\sigma&#39;}e&#39;&lt;/script&gt;
+
+&lt;p&gt;We want to show that &lt;script type=&quot;math/tex&quot;&gt;\App{f}{\sigma}e~~Q~~\App{f&#39;}{\sigma&#39;}e&#39;&lt;/script&gt;.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\App{f}{\sigma} \sim \App{f&#39;}{\sigma&#39;} : \subst{R}{\a}{(\t \to Q)}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\therefore \App{f}{\sigma} \sim \App{f&#39;}{\sigma&#39;} : Q&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\therefore \App{f}{\sigma}e~~Q~~\App{f&#39;}{\sigma&#39;}e&#39;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\blacksquare&lt;/script&gt;
+
+&lt;p&gt;&lt;strong&gt;Theorem&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;e : \allt{\a}{\a \to \a}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;e \cong \Fun{\a}{\fun{x}{\a}{x}} : \allt{\a}{\a \to \a}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;This theorem states that we can still have &lt;script type=&quot;math/tex&quot;&gt;\unitt&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;parallelism&quot;&gt;Parallelism&lt;/h1&gt;
+
+&lt;p&gt;Thus far, we’ve been focusing on &lt;em&gt;small-step evaluation&lt;/em&gt;, &lt;script type=&quot;math/tex&quot;&gt;e \mapsto e&#39;&lt;/script&gt;, where each step is a small, atomic operation. We’ve also encountered &lt;em&gt;large-step evaluation&lt;/em&gt;, &lt;script type=&quot;math/tex&quot;&gt;e \Downarrow v&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;e&lt;/script&gt; evaluates to the value &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; after a number of small steps: &lt;script type=&quot;math/tex&quot;&gt;e \mapsto^* v \wedge v~\m{val} \iff e \Downarrow v&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;nested-parallelism&quot;&gt;Nested Parallelism&lt;/h2&gt;
+
+&lt;p&gt;This terminology is still non-standard, but Crary believes it should and will be.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Parallelism &lt;script type=&quot;math/tex&quot;&gt;\neq&lt;/script&gt; concurrency.&lt;/strong&gt; Parallelism is deterministic–we want to run a computation on multiple processors to improve efficiency, but there is one, deterministic result that is the result of the computation. Concurrency is nondeterministic.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Nested parallelism&lt;/em&gt; is also known as &lt;em&gt;fork-join parallelism&lt;/em&gt;.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \mid \par{x_1}{e_1}{x_2}{e_2}{e}&lt;/script&gt;
+
+&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \prove e_1 : \t_1 \qquad \ctx \prove e_2 : \t_2 \qquad \ctx, x_1 : \t_1, x_2 : \t_2 \prove e : \t}
+{\ctx \prove \par{x_1}{e_1}{x_2}{e_2}{e} : \tau}&lt;/script&gt;
+
+&lt;h3 id=&quot;dynamics&quot;&gt;Dynamics&lt;/h3&gt;
+
+&lt;p&gt;Let’s pretend our construct isn’t parallel, and just evaluate the two expressions sequentially.&lt;/p&gt;
+
+&lt;h4 id=&quot;sequential&quot;&gt;Sequential&lt;/h4&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1 \mapsto e_1&#39;}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapsto \par{x_1}{e_1&#39;}{x_2}{e_2}{e}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e_1} \qquad e_2 \mapsto e_2&#39;}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapsto \par{x_1}{e_1}{x_2}{e_2&#39;}{e}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e_1} \qquad \val{e_2}}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapsto \subst{e_1~e_2}{x_1~x_2}{e}}&lt;/script&gt;
+
+&lt;p&gt;If we can show the actual implementation works like this, we can reason about our parallel code the same way we’ve reasoned about sequential code, which greatly simplifies analysis.&lt;/p&gt;
+
+&lt;p&gt;We will make the distinction between &lt;script type=&quot;math/tex&quot;&gt;\mapstos&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\mapstop&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;parallel&quot;&gt;Parallel&lt;/h4&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1 \mapstop e_1&#39; \qquad e_2 \mapstop e_2&#39;}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapstop \par{x_1}{e_1&#39;}{x_2}{e_2&#39;}{e}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e_1} \qquad e_2 \mapstop e_2&#39;}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapstop \par{x_1}{e_1}{x_2}{e_2&#39;}{e}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e_1 \mapstop e_1&#39; \qquad \val{e_2}}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapstop \par{x_1}{e_1&#39;}{x_2}{e_2}{e}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e_1} \qquad \val{e_2}}
+{\par{x_1}{e_1}{x_2}{e_2}{e} \mapstop \subst{e_1~e_2}{x_1~x_2}{e}}&lt;/script&gt;
+</description>
+        <pubDate>Thu, 26 Mar 2015 13:25:50 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/26/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/26/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
+    
+      <item>
+        <title>15-312 Lecture 18: Existential Types, Representation Independence</title>
         <description>&lt;div style=&quot;display:none&quot;&gt;
 $$
 \renewcommand{\m}[1]{\textsf{#1}}
@@ -94,9 +258,9 @@ end
 \open{\a}{x}{e_1}{e_2} &amp; \defeq \App{e_1}{\t&#39;}(\Fun{\a}{\fun{x}{\tau}{e_2}})
 \end{align} %]]&gt;&lt;/script&gt;
 
-&lt;h2 id=&quot;representation-independence--abstraction-theoremhttpwwwandrewcmueducourse15-312notesmar-20pdf&quot;&gt;&lt;a href=&quot;http://www.andrew.cmu.edu/course/15-312/notes/mar-20.pdf&quot;&gt;Representation Independence / Abstraction Theorem&lt;/a&gt;&lt;/h2&gt;
+&lt;h1 id=&quot;representation-independence--abstraction-theoremhttpwwwandrewcmueducourse15-312notesmar-20pdf&quot;&gt;&lt;a href=&quot;http://www.andrew.cmu.edu/course/15-312/notes/mar-20.pdf&quot;&gt;Representation Independence / Abstraction Theorem&lt;/a&gt;&lt;/h1&gt;
 
-&lt;h3 id=&quot;equivalence&quot;&gt;Equivalence&lt;/h3&gt;
+&lt;h2 id=&quot;equivalence&quot;&gt;Equivalence&lt;/h2&gt;
 
 &lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-equivalence is when two terms are exactly the same, except for variable names. This is the strictest form of equivalence.&lt;/p&gt;
 
@@ -1249,122 +1413,6 @@ m &amp; ::= \ret{e} \mid \bnd{x}{e}{m} \mid \dcl{a}{e}{m} \mid \get{a} \mid \set
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 12: The Untyped Lambda Calculus</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\okt{\m{ok}}
-\newcommand\ok[1]{#1\;\okt}
-\def\ctx{\Gamma}
-\def\defeq{\overset{def}{=}}
-\def\succ{\m{succ}}
-\def\plus{\m{plus}}
-\def\times{\m{times}}
-\def\zero{\bar{0}}
-\def\ifz{\m{ifz}}
-\def\pred{\m{pred}}
-\newcommand\pair[2]{\langle #1, #2 \rangle}
-\def\yc{\m{Y}}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;the-untyped-lambda-calculus&quot;&gt;The Untyped $\lambda$-Calculus&lt;/h1&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;u = x \mid \lambda x . t \mid uu&lt;/script&gt;
-
-&lt;p&gt;Since this is untyped, $\ok{u}$ and&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ok{u} \in \ctx}
-{\Gamma \vdash \ok{u}}
-&lt;/script&gt;
-
-&lt;p&gt;We have the rules you’d expect for the $\okt$ judgement, and for equivalence. &lt;em&gt;[They were illegible. See PFPL 17.1]&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;church-encoding&quot;&gt;Church encoding&lt;/h2&gt;
-&lt;p&gt;Church numerals are (the best-known) special case of Church encoding. We will use $\bar{0}$ to represent numbers in the language, rather than the real world.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{0} \defeq \lambda b . \lambda s . b&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{1} \equiv \lambda b . \lambda s . s(b)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\overline{n + 1} \defeq \lambda b . \lambda s . s(\bar{n} \; b \; s)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\succ \defeq \lambda f . \lambda b . \lambda s . s(f \; b \; s)&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\succ&#39; \defeq \lambda f . \lambda b . \lambda s . f(s \; b) s&lt;/script&gt;
-
-&lt;p&gt;We can prove, for any $n \in \mathbb{N}$, &lt;script type=&quot;math/tex&quot;&gt;\succ(\bar{n}) \equiv \succ&#39;(\bar{n}) \equiv \overline{n+1}&lt;/script&gt; by induction on $n$.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align*}
-\plus &amp; = \lambda m . \lambda n . \lambda b . \lambda s . n \; (m \; b \; s) \; s \\
-&amp; = \lambda m . \lambda n . m \; n \; \succ \\
-\times &amp; = \lambda m . \lambda n . m \; \zero \; (\plus n)
-\end{align*} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;To define $\ifz$, we need to be able to find the predecessor of something:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ifz\{e, e_0, x. e_s\} = e \; e_0 \; (\lambda \_ . [\pred \; e / x] e_s)&lt;/script&gt;
-
-&lt;p&gt;We define $\pred$ as&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\pred(\zero) &amp; \equiv \zero \\
-\pred(\overline{n+1}) &amp; \equiv \bar{n}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Returning to Church encodings, we need to represent numbers as their iterators. This is necessary to be able to obtain the predecessor of a value. First, we define pairs&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\pair{u_1}{u_2} &amp; \defeq \lambda f . f \; u_1 \; u_2 \\
-u \cdot l &amp; \defeq u \; (\lambda x . \lambda y . x) \\
-u \cdot r &amp; \defeq u \; (\lambda x . \lambda y . y)
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\pred&#39; &amp; = \lambda n . n \; \pair{\zero}{\zero} \; (\lambda p . \pair{p \cdot r}{\succ \; (p \cdot r)}) \\
-\pred &amp; = \lambda n . \pred&#39; \; (n) \cdot l
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;To implement $\m{fix}$, we define the $\yc$ combinator.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\yc \defeq \lambda f . (\lambda x . f \; (x \; x)) \; (\lambda x . f \; (x \; x))&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\yc \; F &amp; \equiv (\lambda x . F \; (x \; x)) \; (\lambda x . F \; (x \; x)) \\
-&amp; \equiv F \; ((\lambda x . F \; (x \; x)) \; (\lambda x . F \; (x \; x))) \\
-&amp; \equiv F \; (\lambda f . (\lambda x . f \; (x \; x)) (\lambda x . f \; (x \; x))) \; F \\
-&amp; \equiv F \; (\yc \; F)
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Thus, we have all the computational power of PCF (and computation in general) in a much more compact language.&lt;/p&gt;
-
-&lt;h2 id=&quot;scotts-theorem&quot;&gt;Scott’s Theorem&lt;/h2&gt;
-&lt;p&gt;There exists no effectively computable (computable in the $\lambda$-calculus) algorithm for testing the equivalence of two lambda terms.&lt;/p&gt;
-
-&lt;p&gt;Scott’s Theorem is a special case of &lt;em&gt;Rice’s Theorem&lt;/em&gt;, which states that there exists no effective computable algorithm that can test any (nontrivial, behavioral) property of lambda terms.&lt;/p&gt;
-
-&lt;p&gt;A property $A$ is &lt;em&gt;trivial&lt;/em&gt; if $\forall u . A(u)$ or $\forall u . \neg A(u)$.&lt;/p&gt;
-
-&lt;p&gt;A property $A$ is &lt;em&gt;behavioral&lt;/em&gt; if $u \equiv u’ \supset A(u) \iff A(u’)$.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 19 Feb 2015 13:30:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/19/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/19/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
