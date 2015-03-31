@@ -6,9 +6,199 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 26 Mar 2015 14:50:21 -0400</pubDate>
-    <lastBuildDate>Thu, 26 Mar 2015 14:50:21 -0400</lastBuildDate>
+    <pubDate>Tue, 31 Mar 2015 14:47:54 -0400</pubDate>
+    <lastBuildDate>Tue, 31 Mar 2015 14:47:54 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 20: Futures, Control Operators</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+
+\def\natt{\m{nat}}
+\def\boolt{\m{bool}}
+\def\unitt{\m{unit}}
+\def\voidt{\m{void}}
+
+\def\unit{\langle \rangle}
+
+\def\tt{\m{true}}
+\def\ff{\m{false}}
+
+\def\prove{\vdash}
+
+\renewcommand\fun[3]{\lambda #1 : #2 . #3}
+\renewcommand\Fun[2]{\Lambda #1 . #2}
+
+\renewcommand\let[3]{\m{let}~#1 = #2~\m{in}~#3}
+
+\def\typet{\m{type}}
+\renewcommand\type[1]{#1 : \typet}
+
+\renewcommand\allt[2]{\forall #1.#2}
+\renewcommand\prodt[2]{#1 \times #2}
+\renewcommand\pair[2]{\langle #1, #2 \rangle}
+\renewcommand\App[2]{#1[#2]}
+\renewcommand\subst[3]{[#1 / #2] #3}
+
+\renewcommand\existst[2]{\exists #1.#2}
+\renewcommand\pack[4]{\m{pack}~[#1,#2]~\m{as}~\exists #3.#4}
+\renewcommand\open[4]{\m{open}~[#1,#2] = #3~\m{in}~#4}
+
+\def\defeq{\overset{def}{=}}
+
+\renewcommand\par[5]{\m{par}~#1=#2 \m{ and } #3=#4 \m{ in } #5}
+\renewcommand\val[1]{#1~\m{val}}
+\def\mapstos{\mapsto_{\m{seq}}}
+\def\mapstop{\mapsto_{\m{par}}}
+
+\renewcommand\futt[1]{#1~\m{fut}}
+\renewcommand\fute[1]{\m{fut}(#1)}
+\renewcommand\fsyn[1]{\m{fsyn}(#1)}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;parallelism-continued&quot;&gt;Parallelism (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;implicit-parallelism-theorem&quot;&gt;Implicit Parallelism Theorem&lt;/h2&gt;
+&lt;p&gt;For all values &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;e \mapstos^* v \iff e \mapstop^* v&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;futures&quot;&gt;Futures&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\t &amp; ::= \cdots \mid \futt{\t} \\
+e &amp; ::= \cdots \mid \fute{e} \mid \fsyn{e}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\fsyn{e}&lt;/script&gt; is used to synchronize a future and thereby get its actual value.&lt;/p&gt;
+
+&lt;p&gt;We can define nested parallelism with futures:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\par{x_1}{e_1}{x_2}{e_2} \defeq \let{x_1&#39;}{\fute{e_1}}{
+    \let{x_2}{e_2}{
+        \let{x_1}{\fsyn{x_1&#39;}}{e}
+    }
+}&lt;/script&gt;
+
+&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \prove e : \t}
+{\ctx \prove \fute{e} : \futt{\t}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\ctx \prove e : \futt{\t}}
+{\ctx \prove \fsyn{e} : \t}&lt;/script&gt;
+
+&lt;h3 id=&quot;sequential-dynamics&quot;&gt;Sequential Dynamics&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e}}
+{\val{\fute{e}}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapstos e&#39;}
+{\fute{e} \mapstos \fute{e&#39;}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \mapstos e&#39;}
+{\fsyn{e} \mapstos \fsyn{e&#39;}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\val{e}}
+{\fsyn{\fute{e}} \mapstos e}&lt;/script&gt;
+
+&lt;h3 id=&quot;pipelining&quot;&gt;Pipelining&lt;/h3&gt;
+
+&lt;p&gt;Consider a situation where a &lt;em&gt;producer&lt;/em&gt; builds a list where elements represent units of works. This can easily be programming with a future list.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;[See p.395 of PFPL]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;speculations&quot;&gt;Speculations&lt;/h3&gt;
+
+&lt;p&gt;Speculations are the by-name version of futures.&lt;/p&gt;
+
+&lt;h3 id=&quot;cost-dynamics--brents-theorem&quot;&gt;Cost Dynamics / Brent’s Theorem&lt;/h3&gt;
+
+&lt;p&gt;Work/span analysis.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;[Will be covered in recitation]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;control-operators&quot;&gt;Control Operators&lt;/h1&gt;
+&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+
+\def\natt{\m{nat}}
+
+\renewcommand\ifz[4]{\m{ifz}(#1 ; #2 ; #3 . #4)}
+$$
+&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Exceptions&lt;/li&gt;
+  &lt;li&gt;Continuations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;stack-machines&quot;&gt;Stack machines&lt;/h2&gt;
+&lt;p&gt;We want to store &lt;em&gt;where we are in an expression&lt;/em&gt;. Note that we’re doing call-by-value, and the book does call-by-name.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+k &amp; ::= \cdotp \mid k;s~\square \mid k;\ifz{\square}{e_0}{x}{e_1} \mid \cdots \\
+S &amp; ::= k &gt; e \mid k &lt; e
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+k &gt; z \mapsto k &lt; z %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k &gt; s(e) \mapsto k; s~\square &gt; e&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+k; s~\square &lt; v \mapsto k &lt; s(v) %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k &gt; \ifz{e}{e_0}{x}{e_1} \mapsto k; \ifz{\square}{e_0}{x}{e_1}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+k; \ifz{\square}{e_0}{x}{e_1} &lt; z \mapsto k &gt; e_0 %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+k; \ifz{\square}{e_0}{x}{e_1} &lt; s(v) \mapsto k &gt; [v / x] e_1 %]]&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;soundness--completeness&quot;&gt;Soundness &amp;amp; Completeness&lt;/h3&gt;
+
+&lt;h4 id=&quot;soundness&quot;&gt;Soundness&lt;/h4&gt;
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\cdotp &gt; e \mapsto^* \cdotp &lt; v %]]&gt;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;e \mapsto^*&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{v}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;completeness&quot;&gt;Completeness&lt;/h4&gt;
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;e \mapsto^* v&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{v}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\cdotp &gt; e \mapsto^* \cdotp &lt; v %]]&gt;&lt;/script&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 31 Mar 2015 13:33:22 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/31/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/31/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 19: Representation Independence, Parallelism</title>
@@ -1332,87 +1522,6 @@ m &amp; ::= \ret{e} \mid \bnd{x}{e}{m} \mid \dcl{a}{e}{m} \mid \get{a} \mid \set
         <category>cmu</category>
         
         <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 13: Gulliver&#39;s Travels</title>
-        <description>&lt;p&gt;Occasionally, irrationality is part of being human. Swift was an early proponent of the idea that the main thing that differentiates from animals is language.&lt;/p&gt;
-
-&lt;h2 id=&quot;p-62&quot;&gt;p. 62&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;lots of unnecessary detail&lt;/li&gt;
-  &lt;li&gt;joke is that he doesn’t need to defend her, because he is 12 times larger than her&lt;/li&gt;
-  &lt;li&gt;too much association with the Lilliputians&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;p-80&quot;&gt;p. 80&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;long, overly-detailed passages as a game&lt;/li&gt;
-  &lt;li&gt;playing with the reader&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;pp-21-2&quot;&gt;pp. 21-2&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;Swift is fond of puns&lt;/li&gt;
-  &lt;li&gt;“Master Mr. Bates” to “Mr. Bates” to, finally, “Master Bates”&lt;/li&gt;
-  &lt;li&gt;purpose of language is not communication
-    &lt;ul&gt;
-      &lt;li&gt;part of who we are&lt;/li&gt;
-      &lt;li&gt;like why a monkey swings on his tail&lt;/li&gt;
-      &lt;li&gt;something for us to play with&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;p-71&quot;&gt;p. 71&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;a “real boat” is real because it’s his size&lt;/li&gt;
-  &lt;li&gt;shows he is getting out of his fictional mindset&lt;/li&gt;
-  &lt;li&gt;Swift is showing that the body insists when it is denied&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;pp-82-3&quot;&gt;pp. 82-3&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;Worries that Brobdingnags would dash him against the ground, just as he was earlier considering dashing the Lilliputians against the ground
-    &lt;ul&gt;
-      &lt;li&gt;He doesn’t explicitly recognize this connection&lt;/li&gt;
-      &lt;li&gt;to be human is to make connections, to have narrative history&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;p-110&quot;&gt;p. 110&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;beauty is relative, but still necessary&lt;/li&gt;
-  &lt;li&gt;it’s all a matter of perspective&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;p-111&quot;&gt;p. 111&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;right after passage on beauty (or lack thereof)&lt;/li&gt;
-  &lt;li&gt;grotesque&lt;/li&gt;
-  &lt;li&gt;fountain of blood from neck stump compared to fountain in Palace of Versailles
-    &lt;ul&gt;
-      &lt;li&gt;quite an inappropriate comparison&lt;/li&gt;
-      &lt;li&gt;misfit&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;neither the actual beheading nor the fountain of blood bothered him, but the bouncing of the head startled him&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Aside: William Boroughs claimed the above two passages inspired &lt;em&gt;Naked Lunch.&lt;/em&gt; He claims they present an argument against capital punishment.&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        <pubDate>Tue, 24 Feb 2015 09:00:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/24/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/24/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
         
       </item>
     
