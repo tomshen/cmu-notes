@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>15-312 Lecture 21: Stack Machines, Unraveling, Exceptions</title>
+  <meta name="description" content="$$\renewcommand{\m}[1]{\textsf{#1}}\def\ctx{\Gamma}\def\sig{\Sigma}\def\qquad{~~~~}\def\a{\alpha}\def\b{\beta}\def\t{\tau}\def\emp{\cdotp}">
+
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:400,400italic|Lora:400,700,400italic,700italic">
+  <link rel="stylesheet" href="/notes/css/main.css">
+  <link rel="canonical" href="http://www.tomshen.me/notes/cmu/15312/2015/04/02/">
+  <link rel="alternate" type="application/rss+xml" title="Notes" href="http://www.tomshen.me/notes/feed.xml" />
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'] ]
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/notes/">Notes</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/notes/cmu/15312/">15-312</a>
+          
+        
+          
+          <a class="page-link" href="/notes/cmu/76221/">76-221</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">15-312 Lecture 21: Stack Machines, Unraveling, Exceptions</h1>
+    <p class="post-meta">Apr 2, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <div style="display:none">
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+\def\emp{\cdotp}
+
+\def\natt{\m{nat}}
+\def\unit{\m{unit}}
+\def\exn{\m{exn}}
+
+\def\fail{\m{fail}}
+\renewcommand\catch[2]{\m{catch}~#1~\m{ow}~#2}
+
+\renewcommand\raiset[2]{\m{raise}_{#1}~#2}
+\renewcommand\raise[1]{\m{raise}~#1}
+\renewcommand\handle[3]{\m{handle}~#1~\m{ow}~#2.#3}
+
+\def\defeq{\overset{def}{=}}
+
+\renewcommand\ifz[4]{\m{ifz}(#1 ; #2 ; #3 . #4)}
+$$
+</div>
+
+<h1 id="control-operators-continued">Control Operators (continued)</h1>
+
+<h2 id="stack-machines-continued">Stack machines (continued)</h2>
+
+<p>Refactoring the syntax a bit:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+k & ::= \emp \mid k;~f \\
+f & ::= s~\square \mid \ifz{\square}{e_0}{x}{e_1} \mid \cdots \\
+S & ::= k > e \mid k < e
+\end{align} %]]></script>
+
+<h3 id="soundness--completeness-continued">Soundness &amp; Completeness (continued)</h3>
+
+<p><strong>Lemma.</strong> If <script type="math/tex">e \Downarrow v</script>, then <script type="math/tex">% <![CDATA[
+\forall k. k > e \mapsto^* k < v %]]></script>.</p>
+
+<h2 id="unraveling-reraveling">Unraveling (Reraveling)</h2>
+
+<p>For any state <script type="math/tex">s</script>, <script type="math/tex">s^*</script> is a term.</p>
+
+<p><script type="math/tex">(k > e)^* \defeq k[e]</script><br />
+<script type="math/tex">% <![CDATA[
+(k < e)^* \defeq k[e] %]]></script><br />
+<script type="math/tex">\emp[e] \defeq e</script><br />
+<script type="math/tex">(k; s \square)[e] \defeq k[s(e)]</script><br />
+<script type="math/tex">(k; \ifz{\square}{e_0}{x}{e_1})[e] = k[\ifz{e}{e_0}{x}{e_1}]</script><br />
+<script type="math/tex">(k; \square e_2)[e] = k[e~e_2]</script><br />
+<script type="math/tex">(k; v_1 \square)[e] = k[v_1~e]</script></p>
+
+<p><strong>Lemma.</strong> If <script type="math/tex">s \mapsto s'</script>, then <script type="math/tex">s^* \mapsto^* s'^*</script>.</p>
+
+<p><strong>Proof.</strong> By case analysis on <script type="math/tex">s \mapsto s'</script>.</p>
+
+<p><strong>Lemma.</strong> If <script type="math/tex">e \mapsto e'</script>, then <script type="math/tex">\forall k . k[e] \mapsto k[e']</script>.</p>
+
+<p><strong>Proof.</strong> By induction on <script type="math/tex">k</script>.</p>
+
+<p>Consider the case <script type="math/tex">k = k'; v \square</script>.</p>
+
+<p>We want to show <script type="math/tex">(k; v \square)[e] \mapsto (k'; v \square)[e']</script>. Thus, we want to show <script type="math/tex">k'[v~e] \mapsto k'[v~e']</script>, and so, we want <script type="math/tex">v~e \mapsto v~e'</script>. But, do we actually know that <script type="math/tex">v</script> is a value? It turns out this is true, but we need to codify this in an invariant.</p>
+
+<p>We rephrase the lemma: “if <script type="math/tex">e \mapsto e'</script>, then <script type="math/tex">\forall k</script>, if <script type="math/tex">k</script> is good, <script type="math/tex">k[e] \mapsto k[e']</script>”. Note that since the book does call-by-name, we don’t have to worry about this case, since <script type="math/tex">v\square</script> never happens.</p>
+
+<h2 id="exceptions">Exceptions</h2>
+
+<h3 id="failcatch">Fail/Catch</h3>
+
+<script type="math/tex; mode=display">e ::= \cdots \mid \fail \mid \catch{e}{e}</script>
+
+<p>We can interpret the <script type="math/tex">\m{catch}</script> expression as evaluating the first expression, and if reach <script type="math/tex">\fail</script>, we evaluate the second expression.</p>
+
+<script type="math/tex; mode=display">k ::= \cdots \mid k; f \mid k; \catch{\square}{e}</script>
+
+<script type="math/tex; mode=display">k > \fail \mapsto k \ll</script>
+
+<p>where <script type="math/tex">\ll</script> represents unwinding the stack (to find a handler for <script type="math/tex">\fail</script>)</p>
+
+<script type="math/tex; mode=display">k > \catch{e_1}{e_2} \mapsto k; \catch{\square}{e_2} > e_1</script>
+
+<script type="math/tex; mode=display">% <![CDATA[
+k; \catch{\square}{e} < v \mapsto k < v %]]></script>
+
+<script type="math/tex; mode=display">k; \catch{\square}{e} \ll~\mapsto k > e</script>
+
+<p>If there’s nothing to pop off the stack, then we’ll reach an error.</p>
+
+<script type="math/tex; mode=display">k;f \ll~\mapsto k \ll</script>
+
+<h3 id="raisehandle">Raise/Handle</h3>
+
+<p>We want our exceptions to be able to carry data as well:</p>
+
+<script type="math/tex; mode=display">e ::= \cdots \mid \raiset{\t}{e} \mid \handle{e}{x}{e}</script>
+
+<p>We need to choose <script type="math/tex">\t</script> to be a specific type (as part of the language definition), <script type="math/tex">\tau_{exn}</script>, for typechecking to work. If this is just <script type="math/tex">\m{unit}</script>, then this is basically the same as <script type="math/tex">\fail</script>.</p>
+
+<p><script type="math/tex">k > \raise{e} \mapsto k; \raise{\square} > e</script><br />
+<script type="math/tex">% <![CDATA[
+k; \raise{\square} < v \mapsto k \ll v %]]></script><br />
+<script type="math/tex">k > \handle{e_1}{x}{e_2} \mapsto k; \handle{\square}{x}{e_2} > e_1</script><br />
+<script type="math/tex">% <![CDATA[
+k; \handle{\square}{x}{e_2} < v \mapsto k < v %]]></script><br />
+<script type="math/tex">k; \handle{\square}{x}{e_2} \ll v \mapsto k > [v/x]e_2</script><br />
+<script type="math/tex">k;f \ll v \mapsto k \ll v</script></p>
+
+<p>For proof of type safety, look in <em>PFPL</em>.</p>
+
+<p>Now, let’s consider what <script type="math/tex">\tau_{exn}</script> should be.</p>
+
+<p>Strings are possible (older versions of ML did this), but require serialization and deserialization, which isn’t great.</p>
+
+<p>Ints are used in C, but you’re limited to a fixed mapping of integers to exceptions. You <em>could</em> use Gödel numberings, but no one actually wants that.</p>
+
+<p>We could do <script type="math/tex">\unit + \unit + \unit + \m{string} + \unit + \cdots \unit</script>, where we map each layer of the sum to a different exception. This can be pattern matched on, but is pretty silly.</p>
+
+<p>Instead, (and modern ML does this) we use the extensible type <script type="math/tex">\exn</script>. Note that <script type="math/tex">\exn</script> stands for “extensible,” <strong>not</strong> exception (this is Crary’s revisionist history). We can add to this type with the syntax <script type="math/tex">\m{extension}~\m{Foo}</script>.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Notes</li>
+          <li><a href="mailto:tom@shen.io">tom@shen.io</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/tomshen">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">tomshen</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/tomshen">
+              <span class="icon  icon--twitter">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+                </svg>
+              </span>
+
+              <span class="username">tomshen</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">Notes on classes at CMU.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

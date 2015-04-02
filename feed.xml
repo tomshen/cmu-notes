@@ -6,9 +6,149 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 31 Mar 2015 14:47:54 -0400</pubDate>
-    <lastBuildDate>Tue, 31 Mar 2015 14:47:54 -0400</lastBuildDate>
+    <pubDate>Thu, 02 Apr 2015 14:49:33 -0400</pubDate>
+    <lastBuildDate>Thu, 02 Apr 2015 14:49:33 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 21: Stack Machines, Unraveling, Exceptions</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+\def\emp{\cdotp}
+
+\def\natt{\m{nat}}
+\def\unit{\m{unit}}
+\def\exn{\m{exn}}
+
+\def\fail{\m{fail}}
+\renewcommand\catch[2]{\m{catch}~#1~\m{ow}~#2}
+
+\renewcommand\raiset[2]{\m{raise}_{#1}~#2}
+\renewcommand\raise[1]{\m{raise}~#1}
+\renewcommand\handle[3]{\m{handle}~#1~\m{ow}~#2.#3}
+
+\def\defeq{\overset{def}{=}}
+
+\renewcommand\ifz[4]{\m{ifz}(#1 ; #2 ; #3 . #4)}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;control-operators-continued&quot;&gt;Control Operators (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;stack-machines-continued&quot;&gt;Stack machines (continued)&lt;/h2&gt;
+
+&lt;p&gt;Refactoring the syntax a bit:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+k &amp; ::= \emp \mid k;~f \\
+f &amp; ::= s~\square \mid \ifz{\square}{e_0}{x}{e_1} \mid \cdots \\
+S &amp; ::= k &gt; e \mid k &lt; e
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;h3 id=&quot;soundness--completeness-continued&quot;&gt;Soundness &amp;amp; Completeness (continued)&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Lemma.&lt;/strong&gt; If &lt;script type=&quot;math/tex&quot;&gt;e \Downarrow v&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\forall k. k &gt; e \mapsto^* k &lt; v %]]&gt;&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;unraveling-reraveling&quot;&gt;Unraveling (Reraveling)&lt;/h2&gt;
+
+&lt;p&gt;For any state &lt;script type=&quot;math/tex&quot;&gt;s&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;s^*&lt;/script&gt; is a term.&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;(k &gt; e)^* \defeq k[e]&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+(k &lt; e)^* \defeq k[e] %]]&gt;&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;\emp[e] \defeq e&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;(k; s \square)[e] \defeq k[s(e)]&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;(k; \ifz{\square}{e_0}{x}{e_1})[e] = k[\ifz{e}{e_0}{x}{e_1}]&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;(k; \square e_2)[e] = k[e~e_2]&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;(k; v_1 \square)[e] = k[v_1~e]&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Lemma.&lt;/strong&gt; If &lt;script type=&quot;math/tex&quot;&gt;s \mapsto s&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;s^* \mapsto^* s&#39;^*&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Proof.&lt;/strong&gt; By case analysis on &lt;script type=&quot;math/tex&quot;&gt;s \mapsto s&#39;&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Lemma.&lt;/strong&gt; If &lt;script type=&quot;math/tex&quot;&gt;e \mapsto e&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\forall k . k[e] \mapsto k[e&#39;]&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Proof.&lt;/strong&gt; By induction on &lt;script type=&quot;math/tex&quot;&gt;k&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Consider the case &lt;script type=&quot;math/tex&quot;&gt;k = k&#39;; v \square&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We want to show &lt;script type=&quot;math/tex&quot;&gt;(k; v \square)[e] \mapsto (k&#39;; v \square)[e&#39;]&lt;/script&gt;. Thus, we want to show &lt;script type=&quot;math/tex&quot;&gt;k&#39;[v~e] \mapsto k&#39;[v~e&#39;]&lt;/script&gt;, and so, we want &lt;script type=&quot;math/tex&quot;&gt;v~e \mapsto v~e&#39;&lt;/script&gt;. But, do we actually know that &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; is a value? It turns out this is true, but we need to codify this in an invariant.&lt;/p&gt;
+
+&lt;p&gt;We rephrase the lemma: “if &lt;script type=&quot;math/tex&quot;&gt;e \mapsto e&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\forall k&lt;/script&gt;, if &lt;script type=&quot;math/tex&quot;&gt;k&lt;/script&gt; is good, &lt;script type=&quot;math/tex&quot;&gt;k[e] \mapsto k[e&#39;]&lt;/script&gt;”. Note that since the book does call-by-name, we don’t have to worry about this case, since &lt;script type=&quot;math/tex&quot;&gt;v\square&lt;/script&gt; never happens.&lt;/p&gt;
+
+&lt;h2 id=&quot;exceptions&quot;&gt;Exceptions&lt;/h2&gt;
+
+&lt;h3 id=&quot;failcatch&quot;&gt;Fail/Catch&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \mid \fail \mid \catch{e}{e}&lt;/script&gt;
+
+&lt;p&gt;We can interpret the &lt;script type=&quot;math/tex&quot;&gt;\m{catch}&lt;/script&gt; expression as evaluating the first expression, and if reach &lt;script type=&quot;math/tex&quot;&gt;\fail&lt;/script&gt;, we evaluate the second expression.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k ::= \cdots \mid k; f \mid k; \catch{\square}{e}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k &gt; \fail \mapsto k \ll&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;\ll&lt;/script&gt; represents unwinding the stack (to find a handler for &lt;script type=&quot;math/tex&quot;&gt;\fail&lt;/script&gt;)&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k &gt; \catch{e_1}{e_2} \mapsto k; \catch{\square}{e_2} &gt; e_1&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+k; \catch{\square}{e} &lt; v \mapsto k &lt; v %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k; \catch{\square}{e} \ll~\mapsto k &gt; e&lt;/script&gt;
+
+&lt;p&gt;If there’s nothing to pop off the stack, then we’ll reach an error.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k;f \ll~\mapsto k \ll&lt;/script&gt;
+
+&lt;h3 id=&quot;raisehandle&quot;&gt;Raise/Handle&lt;/h3&gt;
+
+&lt;p&gt;We want our exceptions to be able to carry data as well:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= \cdots \mid \raiset{\t}{e} \mid \handle{e}{x}{e}&lt;/script&gt;
+
+&lt;p&gt;We need to choose &lt;script type=&quot;math/tex&quot;&gt;\t&lt;/script&gt; to be a specific type (as part of the language definition), &lt;script type=&quot;math/tex&quot;&gt;\tau_{exn}&lt;/script&gt;, for typechecking to work. If this is just &lt;script type=&quot;math/tex&quot;&gt;\m{unit}&lt;/script&gt;, then this is basically the same as &lt;script type=&quot;math/tex&quot;&gt;\fail&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;k &gt; \raise{e} \mapsto k; \raise{\square} &gt; e&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+k; \raise{\square} &lt; v \mapsto k \ll v %]]&gt;&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;k &gt; \handle{e_1}{x}{e_2} \mapsto k; \handle{\square}{x}{e_2} &gt; e_1&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+k; \handle{\square}{x}{e_2} &lt; v \mapsto k &lt; v %]]&gt;&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;k; \handle{\square}{x}{e_2} \ll v \mapsto k &gt; [v/x]e_2&lt;/script&gt;&lt;br /&gt;
+&lt;script type=&quot;math/tex&quot;&gt;k;f \ll v \mapsto k \ll v&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;For proof of type safety, look in &lt;em&gt;PFPL&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now, let’s consider what &lt;script type=&quot;math/tex&quot;&gt;\tau_{exn}&lt;/script&gt; should be.&lt;/p&gt;
+
+&lt;p&gt;Strings are possible (older versions of ML did this), but require serialization and deserialization, which isn’t great.&lt;/p&gt;
+
+&lt;p&gt;Ints are used in C, but you’re limited to a fixed mapping of integers to exceptions. You &lt;em&gt;could&lt;/em&gt; use Gödel numberings, but no one actually wants that.&lt;/p&gt;
+
+&lt;p&gt;We could do &lt;script type=&quot;math/tex&quot;&gt;\unit + \unit + \unit + \m{string} + \unit + \cdots \unit&lt;/script&gt;, where we map each layer of the sum to a different exception. This can be pattern matched on, but is pretty silly.&lt;/p&gt;
+
+&lt;p&gt;Instead, (and modern ML does this) we use the extensible type &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt;. Note that &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt; stands for “extensible,” &lt;strong&gt;not&lt;/strong&gt; exception (this is Crary’s revisionist history). We can add to this type with the syntax &lt;script type=&quot;math/tex&quot;&gt;\m{extension}~\m{Foo}&lt;/script&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 02 Apr 2015 13:26:59 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/02/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/02/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 20: Futures, Control Operators</title>
@@ -1324,204 +1464,6 @@ $$
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 13: Modernized Algol</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\newcommand\ok[1]{#1~~\m{ok}}
-\def\natt{\m{nat}}
-\def\gap{\hspace{1cm}}
-\def\valt{\m{val}}
-\newcommand\val[1]{#1~\valt}
-\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
-\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
-\def\gt{\mapsto}
-\def\gts{\gt_{\scriptscriptstyle\sig}}
-\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
-\def\defeq{\overset{def}{=}}
-
-\def\prove{\vdash}
-\def\provesig{\prove_{\scriptscriptstyle\sig}}
-\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
-
-\def\cmdt{\m{cmd}}
-\newcommand\cmd[1]{\cmdt~#1}
-
-\newcommand\ret[1]{\m{ret}~#1}
-
-\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
-\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
-
-\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
-
-\def\midd{~||~}
-
-\newcommand\do[1]{\m{do}~#1}
-
-\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
-
-\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
-
-\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
-\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
-
-\newcommand\get[1]{@#1}
-\newcommand\geta[1]{\m{get}[#1]}
-
-\newcommand\set[2]{#1 := #2}
-\newcommand\seta[2]{\m{set}[#1](#2)}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;imperative-languages&quot;&gt;Imperative Languages&lt;/h1&gt;
-&lt;p&gt;We’re going to discuss Algol, which inspired Pascal, which inspired C. In particular, we’re going talk about &lt;em&gt;Modernized Algol&lt;/em&gt;, which isn’t a real language.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Expressions&lt;/em&gt; are &lt;em&gt;pure&lt;/em&gt;: they have no side effects. Expressions are often referred to as terms.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Commands&lt;/em&gt; are &lt;em&gt;impure&lt;/em&gt;: they may have &lt;em&gt;side effects&lt;/em&gt;; they do something to the world. Side effects can involve changes to the store (modifying memory), or input and output. Commands are often referred to as, rather confusingly, expressions.&lt;/p&gt;
-
-&lt;h1 id=&quot;modernized-algol&quot;&gt;Modernized Algol&lt;/h1&gt;
-&lt;p&gt;A lot of justifications for why things in this language are the way they are will be by &lt;em&gt;lax logic&lt;/em&gt;.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \mid \cmdt \\
-e &amp; ::= \cdots \mid \cmd{m} \\
-m &amp; ::= \ret{e} \mid \bnd{x}{e}{m} \mid \dcl{a}{e}{m} \mid \get{a} \mid \set{a}{e}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;$m$ is a &lt;em&gt;command&lt;/em&gt;. $a$ is an &lt;em&gt;assignable&lt;/em&gt;. It’s commonly referred to as a variable, which is incorrect, because it’s not given meaning through substitution.&lt;/p&gt;
-
-&lt;p&gt;Note that $\m{bnd}$ is not the same as $\m{let}$. With a $\m{bnd}$ command, once $e$ becomes a value, we know it’s a encapsulated command, so we execute it. With a $\m{let}$ expression, we substitute the value of $e$ in for $x$.&lt;/p&gt;
-
-&lt;p&gt;The abstract syntax for some of the commands are:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcla{e}{a}{m} \gap \geta{a} \gap \seta{a}{e}&lt;/script&gt;
-
-&lt;h2 id=&quot;static-semantics&quot;&gt;Static Semantics&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
-
-&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt; is a &lt;em&gt;signature&lt;/em&gt;. In this language, it is a set of assignables.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx, x : \tau \provesig e : \tau&#39;}
-{\ctx \provesig \lambda x : \tau . e : \tau \rightharpoonup \tau&#39;}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig \ok{m}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig \ok{m}}
-{\ctx \provesig \cmd{m} : \cmdt}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \natt}
-{\ctx \provesig \ok{\ret{e}}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \cmdt \gap \Gamma, x : \natt \provesig \ok{m}}
-{\ctx \provesig \ok{\bnd{x}{e}{m}}}
-&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \natt \gap \ctx \provesigx{a} \ok{m}}
-{\ctx \provesig \dcl{a}{e}{\ok{m}}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{a \in \sig}
-{\ctx \provesig \ok{\get{a}}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{a \in \sig \gap \ctx \provesig e : \natt}
-{\ctx \provesig \ok{\set{a}{e}}}&lt;/script&gt;
-
-&lt;p&gt;Note that there is an implicit assumption that $a \not\in \sig$. Note also that this assignment is not persistent. In an implementation, $a$ would reside on the stack, and this is commonly referred to as &lt;em&gt;stack discipline&lt;/em&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\vals{e}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;e \gts e&#39;&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;
-
-&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\mu&lt;/script&gt; is a &lt;em&gt;state&lt;/em&gt;, representing memory where assignables are mapped to values. $m$ is a command.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\final{m \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}{\vals{\cmd{m}}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e}}
-{\ret{e} \midd \final{\mu}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \gts e&#39;}
-{\ret{e} \midd \mu \gts \ret{e&#39;} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \gts e&#39;}
-{\bnd{x}{e}{m} \midd \mu \gts \bnd{x}{e&#39;}{m \midd \mu}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{m_1 \midd \mu \gts m_1&#39; \midd \mu&#39;}
-{\bnd{x}{\cmd{m_1}}{m_2} \midd \mu \gts \bnd{x}{\cmd{m_1&#39;}}{m_2} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e}}
-{\bnd{x}{\cmd{(\ret{e})}}{m} \midd \mu \gts [e/x]~m \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \gts e&#39;}
-{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e} \gap m \midd (\mu, a \hookrightarrow e) \gtsx{a} m&#39; \midd (\mu&#39;, a \hookrightarrow e&#39;)}
-{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m&#39;} \midd \mu&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e_1} \gap \valsx{e_2}{a}}
-{\dcl{a}{e_1}{\ret{e_2}} \midd \mu \gts \ret{e_2} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\get{a} \midd (\mu, a \hookrightarrow e) \gtsx{a} \ret{e} \midd (\mu, a \hookrightarrow e)}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e_1 \gtsx{a} e_1&#39;}
-{\set{a}{e} \midd \mu \gts \set{a}{e_1&#39;} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e_1}}
-{\set{a}{e_1} \midd (\mu, a \hookrightarrow e_2) \gts \ret{e_1} \midd (\mu, a \hookrightarrow e_1)}&lt;/script&gt;
-
-&lt;h2 id=&quot;syntactic-sugar&quot;&gt;Syntactic Sugar&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\bind{x}{m}{m&#39;} &amp; \defeq \bnd{x}{\cmd{m}}{m&#39;} \\
-\do{e} &amp; \defeq \bnd{x}{e}{\ret{x}} \\
-\ifelse{m}{m_1}{m_2} &amp; \defeq \bind{x}{m}{\do{(\ifz{x}{\cmd{m_1}}{\_}{\cmd{m_2}})}}
-\end{align} %]]&gt;&lt;/script&gt;
-</description>
-        <pubDate>Tue, 24 Feb 2015 13:30:41 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/24/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/24/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
