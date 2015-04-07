@@ -6,9 +6,198 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 02 Apr 2015 14:49:33 -0400</pubDate>
-    <lastBuildDate>Thu, 02 Apr 2015 14:49:33 -0400</lastBuildDate>
+    <pubDate>Tue, 07 Apr 2015 14:49:44 -0400</pubDate>
+    <lastBuildDate>Tue, 07 Apr 2015 14:49:44 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 22: Exceptions, Continuations</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+\def\emp{\cdotp}
+
+\def\natt{\m{nat}}
+\def\unit{\m{unit}}
+\def\exn{\m{exn}}
+\def\prove{\vdash}
+\def\typet{\m{type}}
+
+\def\fail{\m{fail}}
+\renewcommand\catch[2]{\m{catch}~#1~\m{ow}~#2}
+
+\renewcommand\raiset[2]{\m{raise}_{#1}~#2}
+\renewcommand\raise[1]{\m{raise}~#1}
+\renewcommand\handle[3]{\m{handle}~#1~\m{ow}~#2.#3}
+
+\def\defeq{\overset{def}{=}}
+
+\renewcommand\ifz[4]{\m{ifz}(#1 ; #2 ; #3 . #4)}
+
+\renewcommand\clsfdt{\m{clsfd}}
+\renewcommand\classt[1]{\m{class}(#1)}
+\renewcommand\newcls[1]{\m{newcls}[#1]}
+\renewcommand\mk[2]{\m{mk}(#1;#2)}
+\renewcommand\isofcls[5]{\m{isofcls}(#1;#2;#3.#4;#5)}
+$$
+&lt;/div&gt;
+
+&lt;h1 id=&quot;control-operators-continued&quot;&gt;Control Operators (continued)&lt;/h1&gt;
+
+&lt;h2 id=&quot;exceptions-continued&quot;&gt;Exceptions (continued)&lt;/h2&gt;
+
+&lt;p&gt;We introduced classified terms, which are exceptions in ML.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\t &amp; ::= \cdots \mid \clsfdt \mid \classt{\t} \\
+e &amp; ::= \cdots \mid \newcls{\t} \mid \mk{e}{e} \mid \isofcls{e}{e}{x}{e}{e}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+\ctx \prove e : \classt{\t} \qquad \ctx \prove e&#39;:\t
+}{
+\ctx \prove \mk{e}{e&#39;} : \clsfdt
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+\ctx \prove e_0 : \classt{\t} \qquad \ctx \prove e_1 : \clsfdt \qquad \ctx, x : \t \prove e_2 : \t&#39; \qquad \ctx \prove e_3 : \t&#39;
+}{
+\ctx \prove \isofcls{e_0}{e_1}{x}{e_2}{e_3} : \t&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+\ctx \prove \t : \typet
+}{
+\newcls{\t} : \classt{\t}
+}&lt;/script&gt;
+
+&lt;p&gt;This system is more powerful than ML’s exceptions. Here’s a way to implement it in ML (or any language with first-class functions and references), though it would probably be more efficient as a primitive.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span class=&quot;n&quot;&gt;signature&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CLSFD&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;sig&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clsfd&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;mk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clsfd&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;isofcls&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clsfd&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;structure&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Clsfd&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&amp;gt;&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CLSFD&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clsfd&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unit&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ref&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ref&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NONE&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ref&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SOME&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isofcls&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;option&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ref&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NONE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NONE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SOME&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Thus, we can see &lt;script type=&quot;math/tex&quot;&gt;\clsfdt&lt;/script&gt; as an abstract data type, with multiple possible implementations. One thing that must be true across all implementations is that classes must be dynamically generated.&lt;/p&gt;
+
+&lt;h3 id=&quot;static-exceptions&quot;&gt;Static Exceptions&lt;/h3&gt;
+&lt;p&gt;Crary claims static exceptions (such as those in Java) don’t work. In our terminology, static exceptions are those that have classes that can be determined statically. In theory, this lets us reason about exceptions that a piece of code may raise.&lt;/p&gt;
+
+&lt;p&gt;However, if you have type abstraction, this doesn’t work. If &lt;code&gt;new&lt;/code&gt; returns a static class, then if you have two classes with different &lt;code&gt;&#39;a&lt;/code&gt;s, they would still have the same classes, which breaks type safety. &lt;em&gt;[My understanding of Crary’s explanation is questionable.]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;continuations&quot;&gt;Continuations&lt;/h2&gt;
+
+&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand\contt[1]{#1~\m{cont}}
+\renewcommand\letcc[3]{\m{letcc}_{#1}~#2~\m{in}~#3}
+\renewcommand\throw[3]{\m{throw}_{#1}~#2~\m{to}~#3}
+\renewcommand\cont[1]{\m{cont}(#1)}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;We’re going to talk about first-class continuations. They give you the ability to capture the “sequel” of the evaluation of the program.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\t &amp; ::= \cdots \mid \contt{\t} \\
+e &amp; ::= \cdots \mid \letcc{\t}{x}{e} \mid \throw{\t}{e}{e} \mid \cont{k}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\contt{\t}&lt;/script&gt; can be thought of as a function that does something, but never returns anything we care about.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+\ctx, x : \contt{\t} \prove e: \t
+}{
+\ctx \prove \letcc{\t}{x}{e} : \t
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+\ctx \prove e : \t \qquad \ctx \prove e&#39; : \contt{\t}
+}{
+\ctx \prove \throw{\t&#39;}{e}{e&#39;} : \t&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+k &gt; \letcc{\t}{x}{e} \mapsto k &gt; [\cont{k} / x] c \\
+k &gt; \throw{\t}{e_1}{e_2} \mapsto k; \throw{\t}{\square}{e_2} &gt; e_1 \\
+k; \throw{\t}{\square}{e_2} &lt; v \mapsto k; \throw{\t}{v}{\square} &gt; e_2 \\
+k; \throw{\t}{v}{\square} &lt; \cont{k&#39;} \mapsto k&#39; &lt; v \\
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Continuations let us have non-local exits. SML/NJ (but not Standard ML) has &lt;code&gt;callcc: (&#39;a cont -&amp;gt; &#39;a) -&amp;gt; &#39;a&lt;/code&gt; and &lt;code&gt;throw: &#39;a * &#39;a cont -&amp;gt; &#39;b&lt;/code&gt;. C has &lt;code&gt;setjmp&lt;/code&gt; and &lt;code&gt;longjmp&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Consider a function that computes the product of a list of &lt;code&gt;nat&lt;/code&gt;s. We might want to exit early if any of them are 0, since there’s no point in computing the product any further.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;λl : nat list .
+    letcc exit in
+        (fix product : nat list -&amp;gt; nat =
+            λl . case l of
+                nil =&amp;gt; 1
+            | 0 :: _ =&amp;gt; throw 0 to exit
+            | n :: t =&amp;gt; n * product t)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can use continuations for “time travel,” without the “paradoxes” that might result if had state.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span class=&quot;n&quot;&gt;datatype&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Large&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Small&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cont&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;guessSize&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;letcc&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Small&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;k&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;of&lt;/span&gt;
+  &lt;span class=&quot;nc&quot;&gt;Large&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;disp&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Small&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Large&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;k&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;largedisp&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre&gt;&lt;code&gt;compose (f : τ&#39; -&amp;gt; τ) (k: τ cont) : τ&#39; cont =
+    letcc k&#39;&#39; in throw f (letcc k&#39; in throw k&#39; to k&#39;&#39;) to k
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that &lt;code&gt;k&#39;&#39;: τ&#39; cont cont&lt;/code&gt;. We can use &lt;code&gt;compose&lt;/code&gt; to implement coroutines in user space.&lt;/p&gt;
+
+&lt;h2 id=&quot;comparing-exceptions-and-continuations&quot;&gt;Comparing Exceptions and Continuations&lt;/h2&gt;
+
+&lt;p&gt;Neither continuations nor exceptions are more powerful than the other. The two features are incomparable. You &lt;em&gt;can&lt;/em&gt; implement exceptions with continuations and references.&lt;/p&gt;
+
+&lt;p&gt;Exceptions actually expand the computing power of a language, because you can implement a loop, which you can’t do with just continuations. In that sense, exceptions are “more powerful.”&lt;/p&gt;
+
+&lt;p&gt;On the other hand, with continuations, we expand the logical scope from constructive logic to classical logic. You can prove anything with loops, but that isn’t &lt;em&gt;that&lt;/em&gt; useful from a logical perspective.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 07 Apr 2015 13:29:45 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/07/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/07/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 21: Stack Machines, Unraveling, Exceptions</title>
@@ -137,7 +326,7 @@ k; \handle{\square}{x}{e_2} &lt; v \mapsto k &lt; v %]]&gt;&lt;/script&gt;&lt;br
 
 &lt;p&gt;We could do &lt;script type=&quot;math/tex&quot;&gt;\unit + \unit + \unit + \m{string} + \unit + \cdots \unit&lt;/script&gt;, where we map each layer of the sum to a different exception. This can be pattern matched on, but is pretty silly.&lt;/p&gt;
 
-&lt;p&gt;Instead, (and modern ML does this) we use the extensible type &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt;. Note that &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt; stands for “extensible,” &lt;strong&gt;not&lt;/strong&gt; exception (this is Crary’s revisionist history). We can add to this type with the syntax &lt;script type=&quot;math/tex&quot;&gt;\m{extension}~\m{Foo}&lt;/script&gt;.&lt;/p&gt;
+&lt;p&gt;Instead, (and modern ML does this) we use the extensible type &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt;. According to Crary’s revisionist history, &lt;script type=&quot;math/tex&quot;&gt;\exn&lt;/script&gt; stands for “extensible,” &lt;strong&gt;not&lt;/strong&gt; exception. We can add to this type with the syntax &lt;script type=&quot;math/tex&quot;&gt;\m{extension}~\m{Foo}&lt;/script&gt;.&lt;/p&gt;
 </description>
         <pubDate>Thu, 02 Apr 2015 13:26:59 -0400</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/04/02/</link>
@@ -1445,25 +1634,6 @@ $$
         <category>cmu</category>
         
         <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 14: Gulliver&#39;s Travels</title>
-        <description>&lt;p&gt;Rather than focusing on the political satire in &lt;em&gt;Gulliver’s Travels&lt;/em&gt;, we’re doing a more critical/perceptive reading. There are many little things in the book that are easily missed. For instance, the fire is started by a maid who is distracted reading a romance novel and thus knocks over a candle. The execution scene is a little strange, as we talked about in the last class.&lt;/p&gt;
-
-&lt;p&gt;On p. 115, we see Gulliver’s “open mindedness” at work. He thinks he’s bigger than he is, and acts like a child to try to prove himself. He actually recognizes that what he’s doing is similar to someone pretending to be someone of higher station, which finds distasteful, but continues his behavior. We can interpret this as either hypocrisy, or &lt;em&gt;less&lt;/em&gt; generously, as sheer forgetfulness.&lt;/p&gt;
-
-&lt;p&gt;Consider the discussion of terrible life of the immortal &lt;em&gt;struldbrugs&lt;/em&gt;. Because they still age, they end up decrepit and useless. Perhaps Swift is commenting on the naturalness of death.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 26 Feb 2015 09:00:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/02/26/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/02/26/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
         
       </item>
     
