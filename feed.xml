@@ -6,9 +6,134 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 07 Apr 2015 14:49:44 -0400</pubDate>
-    <lastBuildDate>Tue, 07 Apr 2015 14:49:44 -0400</lastBuildDate>
+    <pubDate>Thu, 09 Apr 2015 14:46:39 -0400</pubDate>
+    <lastBuildDate>Thu, 09 Apr 2015 14:46:39 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 23: Concurrency &amp; Interaction</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\def\ctx{\Gamma}
+\def\sig{\Sigma}
+\def\qquad{~~~~}
+\def\a{\alpha}
+\def\b{\beta}
+\def\t{\tau}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;We’re going to discuss &lt;strong&gt;abstract process calculus&lt;/strong&gt;, which is derived from &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt;-calculus. The key idea is &lt;em&gt;interacting automata&lt;/em&gt;. We will introduce concurrency to Modernized Algol, creating &lt;em&gt;Concurrent Algol&lt;/em&gt;, thus applying process calculus to a “real” programming language.&lt;/p&gt;
+
+&lt;p&gt;What is concurrency? It’s unrelated to parallelism. Instead, it’s really about &lt;em&gt;composition&lt;/em&gt;, and non-determinism (Bob Harper prefers &lt;em&gt;indeterminacy&lt;/em&gt;).&lt;/p&gt;
+
+&lt;p&gt;Our starting point is consideration of processes as automata. One example is Milner’s vending machine. We have an automata for the vending machine &lt;script type=&quot;math/tex&quot;&gt;V&lt;/script&gt;, and an automata for the person using it &lt;script type=&quot;math/tex&quot;&gt;U&lt;/script&gt;. They interact concurrently (&lt;script type=&quot;math/tex&quot;&gt;V \| U&lt;/script&gt;), since the person loses money as they put it into the machine, and when the machine dispenses a drink, the person gains a drink.&lt;/p&gt;
+
+&lt;h1 id=&quot;process-notation&quot;&gt;Process Notation&lt;/h1&gt;
+&lt;p&gt;We have a primitive called &lt;script type=&quot;math/tex&quot;&gt;\m{await}(E)&lt;/script&gt;, for awaiting events. It can also be represented with &lt;script type=&quot;math/tex&quot;&gt;\$E&lt;/script&gt;. &lt;script type=&quot;math/tex&quot;&gt;?a.P&lt;/script&gt; represents receiving events. &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt; represents a process. &lt;script type=&quot;math/tex&quot;&gt;!a.P&lt;/script&gt; represents sending events. Note these are symmetric, in the sense that we could switch their meanings. &lt;script type=&quot;math/tex&quot;&gt;E_1 + E_2&lt;/script&gt; represents a binary sum, or a binary choice, between events. &lt;script type=&quot;math/tex&quot;&gt;0&lt;/script&gt; represents the null choice, or no choice.&lt;/p&gt;
+
+&lt;p&gt;We can represent &lt;script type=&quot;math/tex&quot;&gt;V&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;U&lt;/script&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;V = \$(?2p.\$(!tea.V + ?2p.(\$(!coffee.V))))&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;U = \$(!2p . \$(!2p . \$(?coffee.U)))&lt;/script&gt;
+
+&lt;p&gt;Note that these are cursive, so some equation solving is required. We want a fixed point.&lt;/p&gt;
+
+&lt;h1 id=&quot;structural-congruence&quot;&gt;Structural Congruence&lt;/h1&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;P \equiv P&#39;&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;E \equiv E&#39;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Structural congruence&lt;/strong&gt; is an equivalence relation that is compaible with all the constructs of the language. The idea is to treat processes and events modulo structural congruence. &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-equivalence is structural equivalence. We want the order of events to not matter.&lt;/p&gt;
+
+&lt;p&gt;We have commutivity: &lt;script type=&quot;math/tex&quot;&gt;E_1 + E_2 \equiv E_2 + E_1&lt;/script&gt;, associativity: &lt;script type=&quot;math/tex&quot;&gt;E_1 + (E_2 + E_3) \equiv (E_1 + E_2) + E_3&lt;/script&gt;, and unit &lt;script type=&quot;math/tex&quot;&gt;E + 0 \equiv E \equiv 0 + E&lt;/script&gt;. Thus, we have a commutative monoid (additivity).&lt;/p&gt;
+
+&lt;h1 id=&quot;composition&quot;&gt;Composition&lt;/h1&gt;
+&lt;p&gt;We’re going to think about of our processors as get/set servers for assignables. &lt;script type=&quot;math/tex&quot;&gt;P_1 \parallel P_2&lt;/script&gt; (or “tensor” &lt;script type=&quot;math/tex&quot;&gt;P_1 \otimes P_2&lt;/script&gt;) represents concurrrent composition. 1 represents inert composition. The order of processes doesn’t matter. This is another commutative monoid (multiplicative).&lt;/p&gt;
+
+&lt;p&gt;The main missing thing is distributivity, so we don’t have a ring.&lt;/p&gt;
+
+&lt;h1 id=&quot;normal-form&quot;&gt;Normal Form&lt;/h1&gt;
+&lt;p&gt;Every process is sturcturally congruent to one of the form&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\$E_1 \parallel \cdots \parallel \$E_n&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;n \geq 0&lt;/script&gt;. That is, it’s a bunch of automata in “a big pot of (matzoh ball) soup.” The multiplicative structure corresponds to “Brownian motion,” letting “the soup boil.”&lt;/p&gt;
+
+&lt;h1 id=&quot;dynamicsinteraction-between-processes&quot;&gt;Dynamics—interaction between processes&lt;/h1&gt;
+&lt;p&gt;We have a labelled transition system:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+P \mapsto^{\epsilon} P&#39; &amp; \alpha  ::= a? &amp; \text{receive action} \\
+P \mapsto^{\alpha} P&#39; &amp; |  a! &amp; \text{send action} \\
+&amp; |  \epsilon &amp; \text{null action}
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;V \overset{2p?}{\mapsto} V&#39; \overset{2p?}{\mapsto} V&#39;&#39; \overset{coffee!}{\mapsto} V&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;V&#39; \overset{tea!}{\mapsto} V&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;U \overset{2p!}{\mapsto} U&#39; \overset{2p!}{\mapsto} \ \overset{coffee?}{\mapsto} U&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{P_1 \equiv P_1&#39; \overset{\alpha}{\mapsto} P_2&#39; \equiv P_2}
+{P_1 \overset{\alpha}{\mapsto} P_2}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\$(a.P + E) \overset{a?}{\mapsto} P&lt;/script&gt;
+
+&lt;p&gt;Note that &lt;script type=&quot;math/tex&quot;&gt;E&lt;/script&gt; is lost. A non-deterministic choice is made.&lt;/p&gt;
+
+&lt;p&gt;The framing principle is that a process takes the same action regardless of “who’s watching.” Thus, if you have several processors, you can have two of them interact in parallel without affecting the others.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    P_1
+    \overset{\alpha}{\mapsto}
+    P_1&#39;
+}{
+    P_1 \parallel P_2 \overset{\alpha}{\mapsto} P_1&#39; \parallel P_2
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    P_1 \overset{\alpha}{\mapsto} P_1&#39; ~~~~
+    P_2 \overset{\overline{\alpha}}{\mapsto} P_2&#39;
+}{
+    P_1 \parallel P_2 \mapsto P_1&#39; \parallel P_2&#39;
+}&lt;/script&gt;
+
+&lt;p&gt;This rule allows for interaction. Thus, the user can get a coffee at the same time the vending machine sends a coffee.&lt;/p&gt;
+
+&lt;h1 id=&quot;replication&quot;&gt;Replication&lt;/h1&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;*P \equiv *P \parallel P&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;*P&lt;/script&gt; is any number of copies of &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt;.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;accept recursive definitions as given&lt;/li&gt;
+  &lt;li&gt;reduce to replication &amp;amp; synchronization&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The activator waits for the assert to arrive, and activates &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A = *\$(?a.P(\$(!a.1))) \equiv A&#39; \parallel A&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;A&#39; = \$(?a.P(\$(!a.1)))&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\$(!a.1)&lt;/script&gt; is the “spark” to activate the next &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 09 Apr 2015 13:30:34 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/09/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/09/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 22: Exceptions, Continuations</title>
@@ -1493,147 +1618,6 @@ m &amp; ::= \cdots \mid \getref{e} \mid \setref{e}{e}
         <category>cmu</category>
         
         <category>76221</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 14: Modernized Algol</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\newcommand\ok[1]{#1~~\m{ok}}
-\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
-\def\natt{\m{nat}}
-\def\gap{\hspace{1cm}}
-\def\valt{\m{val}}
-\newcommand\val[1]{#1~\valt}
-\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
-\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
-\def\gt{\mapsto}
-\def\gts{\gt_{\scriptscriptstyle\sig}}
-\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
-\def\defeq{\overset{def}{=}}
-
-\def\prove{\vdash}
-\def\provesig{\prove_{\scriptscriptstyle\sig}}
-\def\provee{\prove_{\emptyset}}
-\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
-
-\def\cmdt{\m{cmd}}
-\newcommand\cmd[1]{\cmdt~#1}
-
-\newcommand\ret[1]{\m{ret}~#1}
-
-\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
-\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
-
-\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
-\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
-
-\def\midd{~||~}
-
-\newcommand\do[1]{\m{do}~#1}
-
-\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
-
-\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
-
-\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
-\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
-
-\newcommand\get[1]{@#1}
-\newcommand\geta[1]{\m{get}[#1]}
-
-\newcommand\set[2]{#1 := #2}
-\newcommand\seta[2]{\m{set}[#1](#2)}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;safety&quot;&gt;Safety&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\forall a \in \sig . \exists e . \mu(a) = e \wedge \val{e}_{\emptyset} \wedge \prove_{\emptyset} e : \natt}
-{\mu : \sig}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\provesig \ok{m} \gap \mu : \sig}
-{m \midd \oks{\mu}}&lt;/script&gt;
-
-&lt;h3 id=&quot;progress&quot;&gt;Progress&lt;/h3&gt;
-&lt;ol&gt;
-  &lt;li&gt;If $\provesig e : \tau$, then either $\vals{e}$ or $e \gts e’$.&lt;/li&gt;
-  &lt;li&gt;If $\provesig \ok{m}$, then either $m \midd \final{\mu}$ or $m \midd \mu \gts m’ \midd u’$ and $\mu : \sig$.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;We will consider the $\m{dcl}$ case in the proof of 2.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \natt \gap \ctx \provesigx{a} \ok{m}}
-{\ctx \provesig \dcl{a}{e}{\ok{m}}}&lt;/script&gt;
-
-&lt;p&gt;Suppose $\mu : \sig$. We want to show that $\dcl{a}{e}{m \midd \mu}$ or $\exists m’, \mu’ . \dcl{a}{e}{m \midd \mu} \gts m’ \midd \mu’$. By Progress 1 (or, if we’re proving (1) and (2) simultaneously, by the induction hypothesis), $\vals{e}$ or $e \gts e’$.&lt;/p&gt;
-
-&lt;p&gt;Suppose $e \gts e’$. Then, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m \midd \mu}$.&lt;/p&gt;
-
-&lt;p&gt;Suppose $\vals{e}$. Recall that&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e} \gap m \midd (\mu, a \hookrightarrow e) \gtsx{a} m&#39; \midd (\mu&#39;, a \hookrightarrow e&#39;)}
-{\dcl{a}{e}{m} \midd \mu \gts \dcl{a}{e&#39;}{m&#39;} \midd \mu&#39;}&lt;/script&gt;
-
-&lt;p&gt;We claim that $\mu, a \hookrightarrow e : \sig,a$. Note that it is implicit that $a$ is distinct from assignables in $\mu$. We want to show that&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\exists e&#39; . (\mu, a \hookrightarrow e)(a) = e&#39; \wedge \val{e&#39;}_{\emptyset} \wedge \provee e&#39;: \natt&lt;/script&gt;
-
-&lt;p&gt;It is sufficient to show that &lt;script type=&quot;math/tex&quot;&gt;\val{e}_{\emptyset} \wedge \provee e : \natt&lt;/script&gt;. By canonical forms, &lt;script type=&quot;math/tex&quot;&gt;e = \bar{n}&lt;/script&gt; for some &lt;script type=&quot;math/tex&quot;&gt;n \in \mathbb{N}&lt;/script&gt;. Therefore, &lt;script type=&quot;math/tex&quot;&gt;\provee \bar{n} : \natt&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{\bar{n}}_{\emptyset}&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Thus, we have shown that $\mu, a \hookrightarrow e : \sig,a$, and we can apply our induction hypothesis.&lt;/p&gt;
-
-&lt;p&gt;By the induction hypothesis, either $\finalx{m \midd (\mu, a \hookrightarrow e)}{a}$ or $m \midd (\mu, a \hookrightarrow e) \gtsx{a} m’ \midd \hat{\mu}$. By a lemma (or by preservation), $\hat{\mu} = (\mu’, a \hookrightarrow e’)$.&lt;/p&gt;
-
-&lt;p&gt;In the second case, $\dcl{a}{e}{m \midd \mu} \gts \dcl{a}{e’}{m’ \midd \mu’}$.&lt;/p&gt;
-
-&lt;p&gt;In the first case, by inversion, &lt;script type=&quot;math/tex&quot;&gt;m = \ret{e&#39;}&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;\valsx{e&#39;}{a}&lt;/script&gt;. Thus, &lt;script type=&quot;math/tex&quot;&gt;\dcl{a}{e}{m \midd \mu} \gts m \midd \mu&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Thus, we have proved the $\m{dcl}$ case for Progress.&lt;/p&gt;
-
-&lt;h3 id=&quot;preservation&quot;&gt;Preservation&lt;/h3&gt;
-&lt;ol&gt;
-  &lt;li&gt;If &lt;script type=&quot;math/tex&quot;&gt;\provesig e : \tau&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;e \gts e&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\provesig e&#39; : \tau&lt;/script&gt;.&lt;/li&gt;
-  &lt;li&gt;If &lt;script type=&quot;math/tex&quot;&gt;\provesig \ok{m}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\mu : \sig&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\provesig \ok{m&#39;}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\mu&#39; : \sig&lt;/script&gt;.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;The proof of Preservation 1 is identical to the proof for Preservation for PCF, except with extra $\sig$s throughout.&lt;/p&gt;
-
-&lt;p&gt;The proof of Preservation 2 is by induction on the derivation of &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu \gts m&#39; \midd \mu&#39;&lt;/script&gt;. The $\m{dcl}$ case is proven on p. 331 of &lt;em&gt;PFPL&lt;/em&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;extending-the-language&quot;&gt;Extending the Language&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \mid \cmd{\tau}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig m \sim \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig m \sim \tau}
-{\ctx \provesig \cmd{m} : \cmd{\tau}}&lt;/script&gt;
-</description>
-        <pubDate>Thu, 26 Feb 2015 13:27:18 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/02/26/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/02/26/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
         
       </item>
     
