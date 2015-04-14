@@ -6,9 +6,152 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 09 Apr 2015 14:46:39 -0400</pubDate>
-    <lastBuildDate>Thu, 09 Apr 2015 14:46:39 -0400</lastBuildDate>
+    <pubDate>Tue, 14 Apr 2015 14:48:51 -0400</pubDate>
+    <lastBuildDate>Tue, 14 Apr 2015 14:48:51 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 24: Concurrency &amp; Interaction (continued)</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall that we defined processes:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; P ::= \$E \mid P_1 \parallel P_2 \mid \bot \mid *P &lt;/script&gt;
+
+&lt;p&gt;and events:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; E ::= ?a.P \mid !a.P \mid E_1 + E_2 \mid 0 &lt;/script&gt;
+
+&lt;p&gt;We have a labeled transition system &lt;script type=&quot;math/tex&quot;&gt;P \overset{\alpha}{\mapsto} P&#39;&lt;/script&gt; where&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \alpha ::= a? \mid a! \mid \varepsilon &lt;/script&gt;
+
+&lt;p&gt;and &lt;script type=&quot;math/tex&quot;&gt;\overline{a?} \triangleq a!&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\overline{a!} \triangleq a?&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt; \overline{\varepsilon} \triangleq \varepsilon&lt;/script&gt;. (&lt;script type=&quot;math/tex&quot;&gt;P \mapsto P&#39;&lt;/script&gt; means &lt;script type=&quot;math/tex&quot;&gt;P \overset{\varepsilon}{\mapsto} P&#39;&lt;/script&gt;).&lt;/p&gt;
+
+&lt;p&gt;We used iteration (&lt;script type=&quot;math/tex&quot;&gt;*P \equiv P \parallel *P&lt;/script&gt;) to replace recursive definitions, using a system with &lt;em&gt;sparks:&lt;/em&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;spark: &lt;script type=&quot;math/tex&quot;&gt;\$(!x;1)&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;activator: &lt;script type=&quot;math/tex&quot;&gt;*\$(?x; P(\$(!x;1)))&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; becomes &lt;script type=&quot;math/tex&quot;&gt;*\$(?x; P(\$(!x;1))) \mid \$(!x;1)&lt;/script&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Note that channel &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; is dedicated to the implementation &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt;. But, shouldn’t the channel &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; be private to the definition? Thus, we introduce a new process (called a &lt;em&gt;channel&lt;/em&gt;):&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;P ::= \cdots \mid \nu (a.P)&lt;/script&gt;
+
+&lt;p&gt;Note that the bound channel &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-varies, and&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{P =_\alpha P&#39;}
+{P \equiv P&#39;}&lt;/script&gt;
+
+&lt;p&gt;which is sorta similar to &lt;script type=&quot;math/tex&quot;&gt;\m{dcl}(e; a.m)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;The name of the bound channel is an “unguessable secret.”&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;LTS&lt;/strong&gt;: &lt;script type=&quot;math/tex&quot;&gt;P \overset{\alpha}{\underset{\Sigma}{\mapsto}} P&#39;&lt;/script&gt; where &lt;script type=&quot;math/tex&quot;&gt;\vdash_\Sigma \alpha~\m{action}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;communication-generalizes-syncrhonization&quot;&gt;Communication (generalizes syncrhonization)&lt;/h1&gt;
+
+&lt;p&gt;We want to communicate the values of a type. &lt;script type=&quot;math/tex&quot;&gt;\Sigma : a \sim \tau&lt;/script&gt; means that &lt;script type=&quot;math/tex&quot;&gt;a&lt;/script&gt; carries values of type &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt;. To do so, we redefine our events:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;E ::= ?a(x.P) \mid !a(e; p)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;E ::= \m{rcv}[a](x.P) \mid \m{snd}[a](e;P)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma, x: \tau \vdash_{\Sigma, a \sim \tau} P~\m{process}}
+{\Gamma \vdash_{\Sigma, a \sim \tau} ?a(x.P)~\m{event}}&lt;/script&gt;
+
+&lt;p&gt;Note that they are no longer symmetric, since receiving binds, while sending does not.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\alpha ::= a!e \mid a?e \mid \varepsilon&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e~\m{val}_{\Sigma, a \sim \tau}}
+{\$(!a(e;P) + E) \overset{a!e}{\underset{\Sigma, a \sim \tau}{\mapsto}} P}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\vdash_{\Sigma, a \sim \tau} e : \tau ~~~~ e~\m{val}_{\Sigma, a \sim \tau}}
+{\$(?a(x.P) + E) \overset{a?e}{\underset{\Sigma, a \sim \tau}{\mapsto}} [e/x]P}&lt;/script&gt;
+
+&lt;p&gt;We have to change &lt;script type=&quot;math/tex&quot;&gt;\nu(a.P)&lt;/script&gt; to &lt;script type=&quot;math/tex&quot;&gt;\nu(a \sim \tau.P)&lt;/script&gt;, or &lt;script type=&quot;math/tex&quot;&gt;\m{new}[\tau](a.P)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;channel-references&quot;&gt;Channel References&lt;/h1&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \cdots \mid \tau~\m{chan}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+e ::= \cdots \mid \&amp;a %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+(\&amp;a)~\m{val}_{\Sigma, a \sim \tau} %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\Gamma, \vdash_{\Sigma, a \sim \tau} \&amp;a : \tau~\m{chan} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We define new events, called a &lt;em&gt;dynamic&lt;/em&gt; receives and sends:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;E ::= \cdots \mid ??(e; x.P) \mid !!(e_1;e_2;P)&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;e&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;e_1&lt;/script&gt; evaluate to channels, and &lt;script type=&quot;math/tex&quot;&gt;e_2&lt;/script&gt; is the message to send.&lt;/p&gt;
+
+&lt;p&gt;Our old receives and sends are &lt;em&gt;static&lt;/em&gt;, because the channels are specified.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash_\Sigma e : \tau~\m{chan} ~~~~ \Gamma, x:\tau \vdash_\Sigma P~\m{process}}
+{\Gamma \vdash_\Sigma ??(e; x. P)~\m{event}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{\Gamma \vdash_\Sigma e_1 : \tau~\m{chan} ~~~~ \Gamma \vdash_\Sigma e_2 : \tau ~~~~ \Gamma, x:\tau \vdash_\Sigma P~\m{process}}
+{\Gamma \vdash_\Sigma !!(e_1; e_2; P)~\m{event}}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
+{e \underset{\Sigma}{\mapsto} e&#39;}
+{??(e;P) \overset{\varepsilon}{\underset{\Sigma}{\mapsto}} ??(e&#39;;P)}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\frac
+{}
+{??(\&amp;a ;P) \overset{\varepsilon}{\underset{\Sigma, a \sim \tau}{\mapsto}} ?a(x.P)} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;So, the dynamic receive evaluates to the static receive once we get to the channel we have a reference to, and similarly for dynamic sends.&lt;/p&gt;
+
+&lt;p&gt;Consider&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\nu b (\nu a (P \parallel Q) \parallel R)&lt;/script&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt; could have &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\$(!b(\&amp;a ; P&#39;)) %]]&gt;&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;R&lt;/script&gt; could have &lt;script type=&quot;math/tex&quot;&gt;\$(?b(x.\$(!!(x;\m{fact}(5);R&#39;))))&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;This leads to issues (&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\overset{b!\&amp;a}{\underset{\Sigma}{\mapsto^*}} %]]&gt;&lt;/script&gt;) [&lt;em&gt;I wasn’t paying attention for a few minutes&lt;/em&gt;] that lead us to need a new principle, called &lt;em&gt;scope extrusion&lt;/em&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\nu b (\nu a (P \parallel Q) \parallel R) \equiv \nu b \nu a (P \parallel Q \parallel R)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;P \equiv \nu \Sigma\{ \$(E_1) \otimes \cdots \otimes \$(E_n) \}&lt;/script&gt;
+
+&lt;p&gt;which looks very similar to Modernized Algol (except with &lt;script type=&quot;math/tex&quot;&gt;a_1 \hookrightarrow e_1&lt;/script&gt;). In fact, we could say that &lt;script type=&quot;math/tex&quot;&gt;a \hookrightarrow e&lt;/script&gt; means &lt;script type=&quot;math/tex&quot;&gt;\$(?\m{get}(\_) + ?\m{set}(\_))&lt;/script&gt;. [&lt;em&gt;see PFPL for filled in blanks&lt;/em&gt;]&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Memory is nothing more than a bunch of processes.&lt;/strong&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 14 Apr 2015 13:22:10 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/14/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/14/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 23: Concurrency &amp; Interaction</title>
@@ -1542,82 +1685,6 @@ m &amp; ::= \cdots \mid \getref{e} \mid \setref{e}{e}
         <category>cmu</category>
         
         <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>76-221 Class 15: Gulliver&#39;s Travels</title>
-        <description>&lt;h2 id=&quot;language-of-objects-p-172&quot;&gt;Language of objects (p. 172)&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;“Women,” “Vulgar,” and “Illiterate” are “constant irreconcileable enemies to Science”&lt;/li&gt;
-  &lt;li&gt;opposing this language is pretty reasonable&lt;/li&gt;
-  &lt;li&gt;strange that the illiterate would oppose a new language&lt;/li&gt;
-  &lt;li&gt;but even the illiterate realize how terrible this is&lt;/li&gt;
-  &lt;li&gt;implies that women talk too much, though this is Swift criticizing Gulliver and this society&lt;/li&gt;
-  &lt;li&gt;speak with &lt;em&gt;tongues&lt;/em&gt;, with the body
-    &lt;ul&gt;
-      &lt;li&gt;p. 191: “my tongue is in the Mouth of my Friend” when using a translator, also French kissing&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;language is &lt;em&gt;abstract&lt;/em&gt; (more than just objects) and &lt;em&gt;physical&lt;/em&gt; (tongues)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;struldbrugs&quot;&gt;Struldbrugs&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;immortal humans who also age indefinitely&lt;/li&gt;
-  &lt;li&gt;nature is directional, towards death&lt;/li&gt;
-  &lt;li&gt;turning cucumbers back to sunbeams is thus unnatural&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;houyhnhnms&quot;&gt;Houyhnhnms&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;portrayed as perfectly rational , and thus people&lt;/li&gt;
-  &lt;li&gt;yet, Yahoos feel more like people&lt;/li&gt;
-  &lt;li&gt;have capacity for misrepresentation and genocide&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;p-221&quot;&gt;p. 221&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;no word for lying&lt;/li&gt;
-  &lt;li&gt;deficient language&lt;/li&gt;
-  &lt;li&gt;Gulliver defends Master, has gone over to their side&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;p-251&quot;&gt;p. 251&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;no Letters, no literature&lt;/li&gt;
-  &lt;li&gt;yet, have poetry, which is possibly written, and possibly emotional (irrational)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;p-218-9&quot;&gt;p. 218-9&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Gulliver is a “perfect Yahoo”&lt;/li&gt;
-  &lt;li&gt;yet, wants hides of Yahoos for clothing and shoes&lt;/li&gt;
-  &lt;li&gt;Master lies, willing to hide Gulliver’s true nature&lt;/li&gt;
-  &lt;li&gt;Gulliver hates Yahoos because he hates himself&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;p-249&quot;&gt;p. 249&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;Houyhnhnms domesticated and bred the Yahoos
-    &lt;ul&gt;
-      &lt;li&gt;stupid, because asses are better workers anyways&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;now, they want to commit genocide by castrating them, yet consider this solution to avoid taking of lives&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;p-258&quot;&gt;p. 258&lt;/h3&gt;
-&lt;p&gt;Gulliver kills and skins Yahoo children because their skins are softer, and he needs them for his canoe.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 03 Mar 2015 09:00:00 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/76221/2015/03/03/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/76221/2015/03/03/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>76221</category>
         
       </item>
     
