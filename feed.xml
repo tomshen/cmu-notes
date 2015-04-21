@@ -6,9 +6,89 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 14 Apr 2015 14:48:51 -0400</pubDate>
-    <lastBuildDate>Tue, 14 Apr 2015 14:48:51 -0400</lastBuildDate>
+    <pubDate>Tue, 21 Apr 2015 14:45:13 -0400</pubDate>
+    <lastBuildDate>Tue, 21 Apr 2015 14:45:13 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 25: Concurrency &amp; Interaction (continued)</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;Delivered by Bob Harper&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;asynchronous-process-calculus&quot;&gt;Asynchronous Process Calculus&lt;/h1&gt;
+&lt;p&gt;Previously, we discussed sychronous process calculus. But, how is a process supposed to know that some other process has received a message it sent? There must be some sort of back channel between these processes that sends a “notification.”&lt;/p&gt;
+
+&lt;p&gt;We only have receive events:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;E ::= \cdots \mid ?a(x.P) \mid O | E_1 + E_2&lt;/script&gt;
+
+&lt;p&gt;Thus, an event will always be of the form&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;?a_1(x_1.P_1) | \cdots | ?a_n(x_n.P_n)&lt;/script&gt;
+
+&lt;p&gt;This is like &lt;code&gt;select&lt;/code&gt; in CML and Unix sockets.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;P ::= \$E \mid !a(v) \mid \nu a \sim \tau.P \mid 1 \mid P_1 \parallel P_2&lt;/script&gt;
+
+&lt;p&gt;We acknowledge receipt by sending &lt;script type=&quot;math/tex&quot;&gt;\langle \rangle&lt;/script&gt;. We arrange to have backchannels through our own programming.&lt;/p&gt;
+
+&lt;p&gt;What about types on channels?&lt;/p&gt;
+
+&lt;p&gt;You can choose your own by specifying &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt; in &lt;script type=&quot;math/tex&quot;&gt;\nu a \sim \tau.P&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Or, we choose a specific type, via &lt;em&gt;polyadic &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt;-calculus&lt;/em&gt;. We declare channels with &lt;script type=&quot;math/tex&quot;&gt;\nu a .P&lt;/script&gt;. No type is specified, and instead you send a tuple of things and pattern match.&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\nu a \sim \pi . P&lt;/script&gt;. We can only send channels. Data is represented by processes. Milner numerals are process calculus versions of Church numerals.&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\pi \cong \sum_{n \in \mathbb{N}} \pi~\m{chan} \times \cdots \times \pi~\m{chan}&lt;/script&gt;&lt;br /&gt;
+(n times)&lt;/p&gt;
+
+&lt;p&gt;Note that &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; is a recursive type, and that consitutent types are channel references, which admit both send and receive. Recall that &lt;script type=&quot;math/tex&quot;&gt;\Lambda&lt;/script&gt; (the &lt;script type=&quot;math/tex&quot;&gt;\lambda&lt;/script&gt;-calculus) is universal with respect to &lt;script type=&quot;math/tex&quot;&gt;\m{nat} \rightharpoonup \m{nat}&lt;/script&gt;, because &lt;script type=&quot;math/tex&quot;&gt;\lambda \cong (\lambda \to \lambda)&lt;/script&gt;, so we can encode the Y combinator and have recursion. The &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt;-calculus is also universal with respect to &lt;script type=&quot;math/tex&quot;&gt;\m{nat} \rightharpoonup \m{nat}&lt;/script&gt;, because we can encode &lt;script type=&quot;math/tex&quot;&gt;\Lambda&lt;/script&gt; into &lt;script type=&quot;math/tex&quot;&gt;\Pi&lt;/script&gt;. This only works because we have the recursive type.&lt;/p&gt;
+
+&lt;h1 id=&quot;encoding-lambda&quot;&gt;Encoding &lt;script type=&quot;math/tex&quot;&gt;\Lambda&lt;/script&gt;&lt;/h1&gt;
+&lt;p&gt;Key ideas:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\lambda&lt;/script&gt;-terms have names–channels&lt;/li&gt;
+  &lt;li&gt;channels name servers taht can be contacted to obtain their value by passing a backchannel to a continuation (stack, &lt;script type=&quot;math/tex&quot;&gt;\lambda&lt;/script&gt;-term)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Define $M@k$, where $k$ is a channel reference.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;$x @ k \triangleq !!(x;k)$, where $x$ is going to be a $\lambda$-term&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;(\lambda x . M) @ k \triangleq \$(??(k; \langle x, k&#39;\rangle. M @ k))&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+(M~N)@k \triangleq \nu m .(M @ (\&amp;m)) \parallel \nu a . (!m(\langle \&amp; a, k \rangle); *\$(?a.(n.(N~e~n)))) %]]&gt;&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+!m(\langle \&amp; a, k \rangle %]]&gt;&lt;/script&gt; informs &lt;script type=&quot;math/tex&quot;&gt;m&lt;/script&gt; of its argument’s location (server) and where to deliver result, and &lt;script type=&quot;math/tex&quot;&gt;*\$(?a.(n.(N~e~n)))&lt;/script&gt; is the “&lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; server”&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;em&gt;[This is tricky and low level. We aren’t really expected to understand it]&lt;/em&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;consolidated-message-passing&quot;&gt;Consolidated Message Passing&lt;/h1&gt;
+&lt;p&gt;We currently have $a!v$ and $a?v$, but instead, we could label our payloads with a header: $!(a.v)$ and $?(a.v)$. &lt;strong&gt;Globally unique identifiers are just reimplementing &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-conversion.&lt;/strong&gt; A channel is a dynamic class, and a message is just a value of type &lt;script type=&quot;math/tex&quot;&gt;\m{clsfd}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;a \sim \tau&lt;/script&gt; is a class classifying values of type &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt;. Channels have nothing to do with concurrency (inherently, at least).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;P ::= !v \mid ?(x.P) \mid P_1 \parallel P_2 \mid 1&lt;/script&gt;
+
+&lt;p&gt;&lt;strong&gt;Concurrency is non-deterministic composition.&lt;/strong&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 21 Apr 2015 13:29:18 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/21/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/21/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 24: Concurrency &amp; Interaction (continued)</title>
@@ -1439,247 +1519,6 @@ e &amp; ::= x \mid \fun{x}{\tau}{e} \mid ee \mid \Fun{\alpha}{e} \mid \App{e}{\t
         <pubDate>Tue, 17 Mar 2015 13:28:49 -0400</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/03/17/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/17/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 15: Benign effects, Mobile Types, References</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\newcommand\ok[1]{#1~~\m{ok}}
-\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
-\def\natt{\m{nat}}
-\def\gap{\hspace{1cm}}
-\def\valt{\m{val}}
-\newcommand\val[1]{#1~\valt}
-\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
-\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
-\def\gt{\mapsto}
-\def\gts{\gt_{\scriptscriptstyle\sig}}
-\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
-\def\defeq{\overset{def}{=}}
-
-\def\prove{\vdash}
-\def\provesig{\prove_{\scriptscriptstyle\sig}}
-\def\provee{\prove_{\emptyset}}
-\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
-
-\def\cmdt{\m{cmd}}
-\newcommand\cmd[1]{\cmdt~(#1)}
-
-\newcommand\ret[1]{\m{ret}~(#1)}
-
-\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
-\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
-
-\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
-\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
-
-\def\midd{~||~}
-
-\newcommand\do[1]{\m{do}~#1}
-
-\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
-\newcommand\while[2]{\m{while}~(#1)~#2}
-
-\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
-\newcommand\fix[3]{\m{fix}~#1:#2~#3}
-
-\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
-\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
-\newcommand\dclt[4]{\m{dcl}_{#1}~#2 := #3~\m{in}~#4}
-
-\newcommand\get[1]{@#1}
-\newcommand\geta[1]{\m{get}[#1]}
-
-\newcommand\set[2]{#1 := #2}
-\newcommand\seta[2]{\m{set}[#1](#2)}
-
-\newcommand\fun[3]{\lambda #1 : #2 . #3}
-
-\def\qquad{~~~~}
-
-\newcommand\mobile[1]{#1~\m{mobile}}
-\def\voidt{\m{void}}
-\def\unitt{\langle \rangle}
-
-\newcommand\reft[1]{\m{ref}(#1)}
-\newcommand\ref[1]{\&amp;amp;#1}
-\newcommand\getref[1]{*#1}
-\newcommand\setref[2]{#1 := #2}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;syntactic-sugar&quot;&gt;Syntactic Sugar&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\{\bind{x}{m_1}{m_2}\} &amp; \defeq \bnd{x}{\cmd{m_1}}{m_2} \\
-\{ m_1 ; m_2 \} &amp; \defeq \{ \bind{\_}{m_1}{m_2} \} \\
-\while{m_1}{m_2} &amp; \defeq \do{(
-    \fix{\m{loop}}
-        {\cmdt}
-        {\cmd{(\ifelse{m_1}
-                      {\ret{\bar{0}}}
-                      {\{m_2 ; \do{\m{loop}}\}}
-        )}}
-)}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;h2 id=&quot;factorial&quot;&gt;Factorial&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;
-\m{fact} \defeq \fun
-{x}
-{\natt}
-{\cmd{(
-    \dcl{r}{1}{\\\dcl{a}{x}{\\ \{\while{\get{a}}{
-    \{ \\
-        \bnd{y}{\get{r}}{\\\bnd{z}{\get{a}}{\\\set{r}{(x-z+\bar{1})*y ; \\\set{a}{z - \bar{1}}}}}
-    \\\}\\
-    }; \get{r}\}}}
-)}} \\
-\m{fact} : \natt \to \cmdt
-&lt;/script&gt;
-
-&lt;h2 id=&quot;benign-effects&quot;&gt;Benign effects&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;Benign effects&lt;/em&gt; do not change the visible state of the program. For $\m{fact}$, we’d like to produce a function with type $\natt \to \natt$. Even though it indeed only has benign effects, we can’t guarantee that. We can’t hide side effects, but we also can’t hide benign effects.&lt;/p&gt;
-
-&lt;p&gt;Haskell is pure because it does not let you hide any effects, including benign ones. So, if there is an effect, it’s in the type (via monads). SML is impure because it lets you hide benign effects, but you can also hide any other effect.&lt;/p&gt;
-
-&lt;h2 id=&quot;extending-the-language&quot;&gt;Extending the Language&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \mid \cmd{\tau} \\
-m &amp; ::= \cdots \mid \dclt{\tau}{a}{e}{m}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Signatures now include types for assignables.&lt;/p&gt;
-
-&lt;h3 id=&quot;proposed-incorrect-type-system&quot;&gt;Proposed (incorrect) type system&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig e : \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ctx \provesig m \sim \tau&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig m \sim \tau}
-{\ctx \provesig \cmd{m} : \cmd{\tau}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \tau}
-{\ctx \provesig \ret{e} \sim \tau}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \cmd{\tau} \qquad \ctx, x : \tau \provesig m \sim \tau&#39;}
-{\ctx \provesig \bind{x}{e}{m} \sim \tau&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \cmd{\tau} \qquad \ctx, x : \tau \provesig m \sim \tau&#39;}
-{\ctx \provesig \dclt{\tau}{a}{e}{m} \sim \tau&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\ctx \provesigx{a \sim \tau} \get{a} \sim \tau}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesigx{a \sim \tau} e : \tau}
-{\ctx \provesigx{a \sim \tau} \set{a}{e} \sim \tau}&lt;/script&gt;
-
-&lt;p&gt;Why is this incorrect?&lt;/p&gt;
-
-&lt;h3 id=&quot;mobile-types&quot;&gt;Mobile types&lt;/h3&gt;
-
-&lt;p&gt;Consider the program&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcl{a}{\bar{0}}{\ret{\fun{x}{\natt}{\cmd{\set{a}{x}}}}}&lt;/script&gt;
-
-&lt;p&gt;It steps to&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ret{\fun{x}{\natt}{\cmd{\set{a}{x}}}}&lt;/script&gt;
-
-&lt;p&gt;but $a$ is not in scope.&lt;/p&gt;
-
-&lt;p&gt;In the typing judgment for $\m{dcl}$, $\tau’$ needs to be mobile. Alternatively, we can require that the type for $\m{ret}$ must be mobile. Natural numbers are mobile, but functions are not, because they can refer to assignables.&lt;/p&gt;
-
-&lt;p&gt;More precisely, &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt; is &lt;em&gt;mobile&lt;/em&gt; if &lt;script type=&quot;math/tex&quot;&gt;\forall e,\sig . \provesig e : \tau \wedge \vals{e}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\prove_{\emptyset} e : \tau&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\val{e}_{\emptyset}&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Note that if successor for natural numbers ($\m{s}$) is lazy, then natural numbers are &lt;em&gt;not&lt;/em&gt; mobile.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\mobile{\tau_1} \qquad \mobile{\tau_2}}
-{\mobile{\tau_1 + \tau_2}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\voidt}&lt;/script&gt;
-
-&lt;p&gt;The typing rules are still incorrect. Consider the program&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\dcl{a}{\cmd{\ret{\bar{0}}}}{\dcl{b}{\bar{0}}{\{
-    \set{a}{\cmd{\get{b}}}; \ret \unitt
-\}}}&lt;/script&gt;
-
-&lt;p&gt;Here, assignables are escaping through the store. We need $\tau$ to be mobile as well in the typing judgment for $\m{dcl}$.&lt;/p&gt;
-
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-&lt;p&gt;References are a language concept that correspond to the implementation concept pointers. References are not mobile (since they are nothing but assignables).&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \cdots \mid \reft{\tau} \\
-e &amp; ::= \cdots \mid \ref{\tau} \\
-m &amp; ::= \cdots \mid \getref{e} \mid \setref{e}{e}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;h3 id=&quot;statics&quot;&gt;Statics&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\ctx \provesigx{a \sim \tau} \ref{\tau} : \reft{\tau}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e : \ref{\tau}}
-{\ctx \provesig \getref{e} \sim \tau}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig e_1 : \reft{\tau} \qquad \ctx \provesig e_2 : \tau}
-{\ctx \provesig \setref{e_1}{e_2} : \tau}&lt;/script&gt;
-
-&lt;h3 id=&quot;operational-semantics&quot;&gt;Operational Semantics&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\valsx{\ref{a}}{a}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \gts e&#39;}
-{\getref{e} \midd \mu \gts \getref{e&#39;} \midd \mu}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\getref{\ref{a}} \midd \mu \gts \get{a} \midd \mu}&lt;/script&gt;
-
-&lt;p&gt;&lt;em&gt;[for $\setref{e_1}{e_2}$, evaluate $e_1$ and $e_2$]&lt;/em&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e_2}}
-{\setref{\ref{a}}{e_2} \gts \set{a}{e_2} \midd \mu}&lt;/script&gt;
-</description>
-        <pubDate>Tue, 03 Mar 2015 13:28:18 -0500</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/03/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/03/</guid>
         
         
         <category>cmu</category>
