@@ -6,9 +6,279 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 21 Apr 2015 14:45:13 -0400</pubDate>
-    <lastBuildDate>Tue, 21 Apr 2015 14:45:13 -0400</lastBuildDate>
+    <pubDate>Thu, 23 Apr 2015 14:45:08 -0400</pubDate>
+    <lastBuildDate>Thu, 23 Apr 2015 14:45:08 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 26: Proofs as Programs</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+\renewcommand\defeq{\overset{def}{=}}
+
+\renewcommand{\true}[1]{#1~\m{true}}
+
+\renewcommand{\intro}[1]{#1\text{-I}}
+\renewcommand{\elim}[1]{#1\text{-E}}
+
+\renewcommand{\pair}[2]{\langle #1, #2 \rangle}
+\renewcommand{\proj}[2]{#1.#2}
+\renewcommand{\inl}[1]{\m{inl}~#1}
+\renewcommand{\inr}[1]{\m{inr}~#1}
+\renewcommand{\case}[5]{\m{case}(#1;#2.#3;#4.#5)}
+\renewcommand{\unit}{()}
+\renewcommand{\abort}[1]{\m{abort}~#1}
+$$
+&lt;/div&gt;
+
+&lt;p&gt;We’ll be talking about&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;propositions as types&lt;/li&gt;
+  &lt;li&gt;proofs as programs&lt;/li&gt;
+  &lt;li&gt;the Curry-Howard Isomorphism&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;propositions-as-types&quot;&gt;Propositions as types&lt;/h1&gt;
+
+&lt;h2 id=&quot;propositions&quot;&gt;Propositions&lt;/h2&gt;
+
+&lt;p&gt;What is the meaning of a logical proposition? e.g.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\|x\| = 121, \|x\| = 0&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;Denotation&lt;/em&gt; is the assignment of mathematic expressions, and is the truth value.&lt;/p&gt;
+
+&lt;p&gt;So, &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; &lt;strong&gt;is&lt;/strong&gt; &lt;script type=&quot;math/tex&quot;&gt;121&lt;/script&gt;. But, this means that &lt;script type=&quot;math/tex&quot;&gt;\|x\| = 121&lt;/script&gt; is the same as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\forall n &gt; 2 . \forall x,y,z \in \mathbb{N}. x^n + y^n \neq z^n,&lt;/script&gt;
+
+&lt;p&gt;since both are true.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Sense&lt;/em&gt; is &lt;em&gt;[missing]&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;We want both denotation and sense. To resolve this, we want to focus on the proofs.&lt;/p&gt;
+
+&lt;h2 id=&quot;judgments&quot;&gt;Judgments&lt;/h2&gt;
+
+&lt;p&gt;We define a judgment &lt;script type=&quot;math/tex&quot;&gt;\true{A}&lt;/script&gt;. We also assume we have &lt;em&gt;atomic propositions&lt;/em&gt; that we know the proofs for, such as &lt;script type=&quot;math/tex&quot;&gt;11 \times 11 = 121&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A} \qquad
+    \true{B}
+}{
+    \true{A \wedge B}
+}(\intro{\wedge})&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A}
+}{
+    \true{A \vee B}
+}(\intro{\vee}1)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{B}
+}{
+    \true{A \vee B}
+}(\intro{\vee}2)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+
+}{
+    \true{T}
+}(\intro{T})&lt;/script&gt;
+
+&lt;p&gt;(&lt;script type=&quot;math/tex&quot;&gt;\supset&lt;/script&gt; is implication)&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A} \vdash \true{B}
+}{
+    \true{A \supset B}
+}(\intro{\supset})&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\neg A \defeq A \supset F&lt;/script&gt;
+
+&lt;h3 id=&quot;elimination&quot;&gt;Elimination&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A \wedge B}
+}{
+    \true{A}
+}(\elim{\wedge}1)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A \wedge B}
+}{
+    \true{B}
+}(\elim{\wedge}2)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A \vee B} \qquad
+    \true{A} \vdash \true{C} \qquad
+    \true{B} \vdash \true{C}
+}{
+    \true{C}
+}(\elim{\vee})&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{F}
+}{
+    \true{C}
+}(\elim{F})&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{A \supset B} \qquad
+    \true{A}
+}{
+    \true{B}
+}(\elim{\supset})&lt;/script&gt;
+
+&lt;h2 id=&quot;intuitionistic--constructive-logic&quot;&gt;Intuitionistic / Constructive Logic&lt;/h2&gt;
+&lt;p&gt;We’ve just defined the basics of constructive logic. Note that we cannot prove that, in general,&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+
+}{
+    \true{A \vee \neg A}
+}.&lt;/script&gt;
+
+&lt;p&gt;In other words, we do not have the &lt;em&gt;law of excluded middle&lt;/em&gt;. Similarly, we cannot prove&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \true{\neg \neg A} \qquad
+    \true{A}
+}{
+    \neg \neg A \supset \true{A}
+},&lt;/script&gt;
+
+&lt;p&gt;which is &lt;em&gt;double negation elimination&lt;/em&gt;, since it is equivalent to the law of excluded middle. This is important since this is how we do proof by contradiction.&lt;/p&gt;
+
+&lt;p&gt;You may think that classical logic is “better,” since we have these (pretty handy) theorems. But, you lose the distinction between &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\neg \neg A&lt;/script&gt;. Thus, &lt;strong&gt;intuitionistic logic has more expressive power.&lt;/strong&gt; Additionally, intuitionistic logic has a useful computational interpretation.&lt;/p&gt;
+
+&lt;h1 id=&quot;proofs-as-programs&quot;&gt;Proofs as programs&lt;/h1&gt;
+
+&lt;p&gt;We represent “&lt;script type=&quot;math/tex&quot;&gt;M&lt;/script&gt; is a &lt;em&gt;proof term&lt;/em&gt; for &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt;” with &lt;script type=&quot;math/tex&quot;&gt;M : A&lt;/script&gt;.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A \qquad
+    N : B
+}{
+    \pair{M}{N} : A \wedge B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A \wedge B
+}{
+    \proj{M}{l} : A
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A \wedge B
+}{
+    \proj{M}{r} : B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    x : A \vdash M : B
+}{
+    \lambda x : A.M : A \supset B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A \supset B \qquad
+    N : A
+}{
+    MN : B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A
+}{
+    \inl{M} : A \vee B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : B
+}{
+    \inr{M} : A \vee B
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : A \vee B \qquad
+    x : A \vdash N : C \qquad
+    y : B \vdash O : C
+}{
+    \case{M}{x}{N}{y}{O} : C
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+
+}{
+    \unit : T
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    M : F
+}{
+    \abort{M} : C
+}&lt;/script&gt;
+
+&lt;p&gt;So, a proof of &lt;script type=&quot;math/tex&quot;&gt;\true{(A \supset B) \supset (\neg B \supset \neg A)}&lt;/script&gt; would be&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\lambda f : A \supset B . \lambda y : \neg B . \lambda x : A . g(f x)&lt;/script&gt;
+
+&lt;p&gt;This is the &lt;em&gt;Curry-Howard Isomorphism&lt;/em&gt;!&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Propositions&lt;/th&gt;
+      &lt;th&gt;Types&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A \wedge B&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A \times B&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A \vee B&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A + B&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A \supset B&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;A \to B&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;\unit&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;F&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;\m{void}&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;\forall x . A&lt;/script&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;script type=&quot;math/tex&quot;&gt;\pi x . A&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Note that recursive types don’t work out well, since it’s then possible to prove any proposition.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 23 Apr 2015 13:32:05 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/23/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/23/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 25: Concurrency &amp; Interaction (continued)</title>
@@ -1327,198 +1597,6 @@ val x = case !(r : (int -&amp;gt; int) option ref) of
         <pubDate>Thu, 19 Mar 2015 13:30:50 -0400</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/03/19/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/19/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 16: Aliasing, Free References, Polymorphism (System F)</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\newcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\newcommand\ok[1]{#1~~\m{ok}}
-\newcommand\oks[1]{#1~~\m{ok}_{\sig}}
-\def\natt{\m{nat}}
-\def\gap{\hspace{1cm}}
-\def\valt{\m{val}}
-\newcommand\val[1]{#1~\valt}
-\newcommand\vals[1]{#1~\valt_{\scriptscriptstyle\sig}}
-\newcommand\valsx[2]{#1~\valt_{\scriptscriptstyle\sig, #2}}
-\def\gt{\mapsto}
-\def\gts{\gt_{\scriptscriptstyle\sig}}
-\newcommand\gtsx[1]{\gt_{\scriptscriptstyle\sig, #1}}
-\def\defeq{\overset{def}{=}}
-
-\def\prove{\vdash}
-\def\provesig{\prove_{\scriptscriptstyle\sig}}
-\def\provee{\prove_{\emptyset}}
-\newcommand\provesigx[1]{\prove_{\scriptscriptstyle \sig,#1}}
-
-\def\cmdt{\m{cmd}}
-\newcommand\cmd[1]{\cmdt~(#1)}
-
-\newcommand\ret[1]{\m{ret}~(#1)}
-
-\newcommand\bnd[3]{\m{bnd}~#1 \leftarrow #2; #3}
-\newcommand\bind[3]{\{ #1 \leftarrow #2; #3 \}}
-
-\newcommand\final[1]{#1~\m{final}_{\scriptscriptstyle\sig}}
-\newcommand\finalx[2]{#1~\m{final}_{\scriptscriptstyle\sig,#2}}
-
-\def\midd{~||~}
-
-\newcommand\do[1]{\m{do}~#1}
-
-\newcommand\ifelse[3]{\m{if}~(#1)~#2~\m{else}~#3}
-\newcommand\while[2]{\m{while}~(#1)~#2}
-
-\newcommand\ifz[4]{\m{ifz}(#1;#2;#3.#4)}
-\newcommand\fix[3]{\m{fix}~#1:#2~#3}
-
-\newcommand\dcl[3]{\m{dcl}~#1 := #2~\m{in}~#3}
-\newcommand\dcla[3]{\m{dcl}(#1; #2.#3)}
-\newcommand\dclt[4]{\m{dcl}_{#1}~#2 := #3~\m{in}~#4}
-
-\newcommand\get[1]{@#1}
-\newcommand\geta[1]{\m{get}[#1]}
-
-\newcommand\set[2]{#1 := #2}
-\newcommand\seta[2]{\m{set}[#1](#2)}
-
-\newcommand\fun[3]{\lambda #1 : #2 . #3}
-
-\def\qquad{~~~~}
-
-\newcommand\mobile[1]{#1~\m{mobile}}
-\def\voidt{\m{void}}
-\def\unitt{\langle \rangle}
-
-\newcommand\reft[1]{\m{ref}(#1)}
-\newcommand\ref[1]{\&amp;amp;#1}
-\newcommand\getref[1]{*#1}
-\newcommand\setref[2]{#1 := #2}
-\newcommand\newref[2]{\m{newref}_{#1} #2}
-
-\newcommand\state[3]{\nu (#1) \{ #2 \midd #3 \}}
-\newcommand\statesig[2]{\nu \sig \{ #1 \midd #2 \}}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;modernized-algol-continued&quot;&gt;Modernized Algol (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;references-continued&quot;&gt;References (continued)&lt;/h2&gt;
-
-&lt;h3 id=&quot;aliasing&quot;&gt;Aliasing&lt;/h3&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-e \mathrel{+}= e&#39; &amp; \defeq \bind{x}{\getref{e}}{\bind{y}{\getref{e&#39;}}{\setref{e}{(x+y)}}}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Two references that govern the same underlying assignable are said to be &lt;em&gt;aliases&lt;/em&gt;. The possibility of aliasing complicates reasoning about the correctness of code that uses references, for we must always consider for any two references whether or not they might be aliases.&lt;/p&gt;
-
-&lt;h2 id=&quot;free-assignables&quot;&gt;Free Assignables&lt;/h2&gt;
-
-&lt;p&gt;In order to be able to have mutable data structures, we need assignables that can live outside the scopes of their declarations. We call these &lt;em&gt;scope-free&lt;/em&gt; or &lt;em&gt;free&lt;/em&gt; assignables.&lt;/p&gt;
-
-&lt;p&gt;We change &lt;script type=&quot;math/tex&quot;&gt;\m{dcl}&lt;/script&gt; to add assignables to the state.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\statesig{m}{\mu}&lt;/script&gt;
-
-&lt;p&gt;represents a state where the assignables &lt;script type=&quot;math/tex&quot;&gt;m \midd \mu&lt;/script&gt; are bound. &lt;script type=&quot;math/tex&quot;&gt;\nu&lt;/script&gt; is purely for notational purposes.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\vals{e}}
-{\statesig{\dclt{\tau}{a}{e}{m}}{\mu} \gt \state{\sig,a \sim \tau}{m}{(\mu, a \hookrightarrow e)}}&lt;/script&gt;
-
-&lt;p&gt;We don’t need a mobility condition for&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \provesig{e : \tau} \qquad \ctx \provesigx{a \sim \tau}{m \sim \tau&#39;}}
-{\ctx \provesig{\dclt{\tau}{a}{e}{m \sim \tau&#39;}}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\newref{\tau}{e} \defeq \dclt{\tau}{a}{e}{\ref{a}}&lt;/script&gt;
-
-&lt;p&gt;&lt;em&gt;[backpatching to implement recursion]&lt;/em&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;preservation&quot;&gt;Preservation&lt;/h3&gt;
-
-&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;\statesig{m}{\mu} \gt \statesig{m&#39;}{\mu&#39;}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\provesig{m \sim \tau}&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\provesig{\mu : \sig}&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\prove_{\scriptscriptstyle\sig&#39;} m&#39; \sim \tau&lt;/script&gt;,  &lt;script type=&quot;math/tex&quot;&gt;\prove_{\scriptscriptstyle\sig&#39;} \mu&#39; : \sig&#39;&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\sig&#39;&lt;/script&gt; extends &lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Note that in languages with &lt;script type=&quot;math/tex&quot;&gt;\m{free}&lt;/script&gt; (such as C), it is not always the case that &lt;script type=&quot;math/tex&quot;&gt;\sig&#39;&lt;/script&gt; extends &lt;script type=&quot;math/tex&quot;&gt;\sig&lt;/script&gt;. We would need a lot more sophistication in order to have a working type system. Most languages with &lt;script type=&quot;math/tex&quot;&gt;\m{free}&lt;/script&gt; are just broken.&lt;/p&gt;
-
-&lt;h1 id=&quot;polymorphism&quot;&gt;Polymorphism&lt;/h1&gt;
-
-&lt;p&gt;We will be discussing a language called System F, also known as polymorphic lambda calculus. We will have bare type variables.&lt;/p&gt;
-
-&lt;div style=&quot;display:none&quot;&gt;
-$$
-\renewcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\def\qquad{~~~~}
-
-\def\prove{\vdash}
-
-\renewcommand\fun[3]{\lambda #1 : #2 . #3}
-\renewcommand\Fun[2]{\Lambda #1 . #2}
-
-\def\typet{\m{type}}
-\renewcommand\type[1]{#1~\typet}
-
-\renewcommand\allt[2]{\forall(#1.#2)}
-\renewcommand\App[2]{#1[#2]}
-\renewcommand\subst[3]{[#1 / #2] #3}
-$$
-&lt;/div&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\tau &amp; ::= \alpha \mid \tau \to \tau \mid \allt{\alpha}{\tau} \\
-e &amp; ::= x \mid \fun{x}{\tau}{e} \mid ee \mid \Fun{\alpha}{e} \mid \App{e}{\tau}
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;Note the lack of explicit product and sum types. System F’s typing is actually more powerful than ML because you can include $\forall$ in types. (ML forces you to have all quantifiers at the beginning of the type, but saves you from having to write them explicitly.)&lt;/p&gt;
-
-&lt;h2 id=&quot;statics&quot;&gt;Statics&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx(x)=\tau}
-{\ctx \prove x : \tau}&lt;/script&gt;
-
-&lt;p&gt;&lt;em&gt;[missing judgements]&lt;/em&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx,\alpha : \typet \prove e : \tau}
-{\ctx \prove \Fun{\alpha}{e} : \allt{\alpha}{\tau}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \prove e : \allt{\alpha}{\tau&#39;} \qquad \ctx \prove \tau : \typet}
-{\ctx \prove \App{e}{\tau} : \subst{\tau}{\alpha}{\tau&#39;}}&lt;/script&gt;
-
-&lt;p&gt;&lt;em&gt;[missing judgements for &lt;script type=&quot;math/tex&quot;&gt;\typet&lt;/script&gt;]&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;dynamics&quot;&gt;Dynamics&lt;/h2&gt;
-
-&lt;p&gt;&lt;em&gt;[missing rules for usual evaluation]&lt;/em&gt;&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{e \to e&#39;}
-{\App{e}{\tau} \to \App{e&#39;}{\tau}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{}
-{\App{(\Fun{\alpha}{e})}{\tau} \to \subst{\tau}{\alpha}{e}}&lt;/script&gt;
-</description>
-        <pubDate>Tue, 17 Mar 2015 13:28:49 -0400</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/17/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/17/</guid>
         
         
         <category>cmu</category>
