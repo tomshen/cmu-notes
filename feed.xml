@@ -6,9 +6,197 @@
 </description>
     <link>http://www.tomshen.me/notes/</link>
     <atom:link href="http://www.tomshen.me/notes/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 28 Apr 2015 14:49:21 -0400</pubDate>
-    <lastBuildDate>Tue, 28 Apr 2015 14:49:21 -0400</lastBuildDate>
+    <pubDate>Thu, 30 Apr 2015 14:47:28 -0400</pubDate>
+    <lastBuildDate>Thu, 30 Apr 2015 14:47:28 -0400</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>15-312 Lecture 28: Higher-order type constructors</title>
+        <description>&lt;div style=&quot;display:none&quot;&gt;
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+
+\renewcommand{\type}{\m{type}}
+\renewcommand{\natt}{\m{nat}}
+\renewcommand{\intt}{\m{int}}
+
+\renewcommand{\pair}[2]{\langle #1, #2 \rangle}
+\renewcommand{\ref}[1]{#1~\m{ref}}
+$$
+&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The final exam will be cumulative, including all lectures. There will be more of a focus on material covered in the second half of the course. Open book, open notes, but “closed” electronics.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’re going to be discussing &lt;em&gt;higher-order type constructors,&lt;/em&gt; also known as &lt;em&gt;higher kinds.&lt;/em&gt; The associated language is $F_\omega$.&lt;/p&gt;
+
+&lt;p&gt;Recall System-F:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \alpha \mid \forall \alpha . \tau \mid \tau \to \tau&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::= x \mid \Lambda \alpha . e \mid e[\tau] \mid \lambda x : \tau . e \mid e~e&lt;/script&gt;
+
+&lt;p&gt;We’ve said that $\tau : \m{type}$. But is $\type$ a type? If it is, then we can ask if $\type : \type$, but this is a really bad question. $\type$ can’t be a type, but it also can’t not be a type. How do we resolve this?&lt;/p&gt;
+
+&lt;p&gt;If we want to have computations that produce types, then we want these computations have types as well. We call these types of types &lt;em&gt;kinds&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Currently, our only kind is $\type$. We replace $\tau$ with $c$, which stands for &lt;em&gt;type constructor&lt;/em&gt; (or just &lt;em&gt;constructor&lt;/em&gt;).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k ::= \type&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tau ::= \alpha \mid \forall \alpha : k .c \mid c \to c&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;e ::=  x \mid \Lambda \alpha : k . e \mid e[c] \mid \lambda x : c . e \mid e~e &lt;/script&gt;
+
+&lt;p&gt;We have two types (&lt;em&gt;types types types types types&lt;/em&gt;) of judgments: $e : c$ and $c : k$.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma, \alpha : k \vdash e : c
+}{
+    \Gamma \vdash \Lambda \alpha : k . e : \forall \alpha : k . c
+}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;[Missing quite a few judgments]&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;We add a new type:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;k ::= \type \mid k \to k&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;c ::= \cdots \mid \lambda \alpha : k . c \mid c~c&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma, \alpha : k \vdash c : k&#39;
+}{
+    \Gamma \vdash \lambda \alpha : k . c : k \to k&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c_1 : k \to k&#39; \qquad
+    \Gamma \vdash c_2 : k
+}{
+    \Gamma \vdash c_1~c_2 : k&#39;
+}&lt;/script&gt;
+
+&lt;p&gt;Note that distinction between $\lambda \alpha : k . c$ and $\lambda \alpha : k . c$. The former is &lt;em&gt;not&lt;/em&gt; a type, and the latter is a &lt;em&gt;type&lt;/em&gt;, with members.&lt;/p&gt;
+
+&lt;p&gt;Standard ML doesn’t have type constructors (Haskell does!), but you can simulate them with functors:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sml&quot; data-lang=&quot;sml&quot;&gt;&lt;span class=&quot;kr&quot;&gt;functor&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Foo&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;X&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;sig&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;struct&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;u&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kr&quot;&gt;end&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;sig&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;u&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;$\m{Foo} : \forall t : \type . t~\intt \to \exists u : \type \to \type. u~\intt$&lt;/p&gt;
+
+&lt;p&gt;As an example, we’ll define a general increment function that will incrememnt anything that looks like a counter:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{counter} = \exists \alpha . \alpha \times ((\alpha \to \alpha) \times (\alpha \to \natt))&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{genInc} : \forall \alpha . (\alpha \to \m{counter}) \to \alpha \to \alpha&lt;/script&gt;
+
+&lt;p&gt;Without higher order type constructors, we can’t write this:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{genInc} : \Lambda \alpha . \lambda f : \alpha \to \m{counter} . \lambda x : \alpha . ??&lt;/script&gt;
+
+&lt;p&gt;We define a counter interface:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{counterI} : \type \to \type = \lambda \alpha : \type . (\alpha \to \alpha) \times (\alpha \to \natt)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{obj} : (\type \to \type) \to \type = \lambda \varphi : \type \to \type . \exists \alpha . \alpha \times \varphi~\alpha&lt;/script&gt;
+
+&lt;p&gt;Note that $\m{counter} \cong \m{obj}~\m{counterI}$.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+\m{genInc} : &amp; \forall \varphi : \type \to \type . (\forall \alpha . \varphi~\alpha \to \m{counterI}~\alpha) \to \m{obj}~\varphi \to \m{obj}~\varphi \\
+= &amp; \Lambda \varphi : \type \to \type . (\forall \alpha . \varphi~\alpha \to \m{counterI}~\alpha) . \lambda x : \m{obj}~\varphi . \\
+&amp; \m{unpack}~[\alpha,y] = x \m{ in } \m{pack}~[\alpha, \pair{f[\alpha](y \cdot r) \cdot l~(y \cdot l)}{y \cdot r}] \\
+&amp; \m{ as } \exists \alpha . \alpha \times \varphi~\alpha
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Consider $\m{id} : \forall \varphi : \type \to \type . \varphi~\intt \to \varphi~\intt$.&lt;/p&gt;
+
+&lt;p&gt;But when we try to apply this:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\m{id}[\lambda \alpha : \type . \alpha]~12&lt;/script&gt;
+
+&lt;p&gt;We end up with &lt;script type=&quot;math/tex&quot;&gt;(\lambda \alpha . \alpha)~\intt \to (\lambda \alpha . \alpha)~\intt&lt;/script&gt;. However, &lt;script type=&quot;math/tex&quot;&gt;(\lambda \alpha . \alpha)~\intt \neq \intt&lt;/script&gt;. Though these types are equivalent, they are not identical, and thus we don’t recognize this in our type theory. We fix this with the &lt;em&gt;equivalence rule&lt;/em&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash e : \tau \qquad
+    \Gamma \vdash \tau \equiv \tau&#39; : \type
+}{
+    \Gamma \vdash e : \tau&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c : k
+}{
+    \Gamma \vdash c \equiv c : k
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c \equiv c&#39; : k
+}{
+    \Gamma \vdash c&#39; \equiv c : k
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c_1 \equiv c_2 : k \qquad
+    \Gamma \vdash c_2 \equiv c_3 : k
+} {
+    \Gamma \vdash c_1 \equiv c_3 : k
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c&#39; : k_1 \qquad
+    \Gamma, \alpha : k \vdash c : k_2
+}{
+    \Gamma \vdash (\lambda \alpha : k_1 . c) c&#39; \equiv [c&#39; / \alpha]~c : k_2
+}(\beta)&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c_1 \equiv c_1 : \type \qquad
+    \Gamma \vdash e_2 \equiv e_2&#39; : \type
+}{
+    \Gamma \vdash c_1 \to c_2 \equiv c_1&#39; \to c_2&#39; : \type
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma \vdash c_1 \equiv c_1&#39; : k \to k&#39; \qquad
+    \Gamma \vdash c_2 \equiv _2&#39; : k
+}{
+    \Gamma \vdash c_1~c_2 \equiv c_1&#39;~c_2&#39; : k&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma, \alpha : k \vdash c \equiv c&#39; : k&#39;
+}{
+    \Gamma \vdash \alpha : k . c \equiv \lambda \alpha : k . c&#39; : k \to k&#39;
+}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{
+    \Gamma, \alpha : k \vdash c~\alpha \equiv c&#39;~\alpha : k_2
+}{
+    \Gamma \vdash c \equiv c&#39; : k_1 \to k_2
+}(\m{extensionality})&lt;/script&gt;
+
+&lt;p&gt;(must hold for all $\alpha$)&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;Church-Rosser Theorem&lt;/strong&gt; lets us prove normal forms with these equivalence rules [?].&lt;/p&gt;
+</description>
+        <pubDate>Thu, 30 Apr 2015 13:31:32 -0400</pubDate>
+        <link>http://www.tomshen.me/notes/cmu/15312/2015/04/30/</link>
+        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/04/30/</guid>
+        
+        
+        <category>cmu</category>
+        
+        <category>15312</category>
+        
+      </item>
     
       <item>
         <title>15-312 Lecture 27: Subtyping</title>
@@ -1474,145 +1662,6 @@ $$
         <pubDate>Thu, 26 Mar 2015 13:25:50 -0400</pubDate>
         <link>http://www.tomshen.me/notes/cmu/15312/2015/03/26/</link>
         <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/26/</guid>
-        
-        
-        <category>cmu</category>
-        
-        <category>15312</category>
-        
-      </item>
-    
-      <item>
-        <title>15-312 Lecture 18: Existential Types, Representation Independence</title>
-        <description>&lt;div style=&quot;display:none&quot;&gt;
-$$
-\renewcommand{\m}[1]{\textsf{#1}}
-\def\ctx{\Gamma}
-\def\sig{\Sigma}
-\def\qquad{~~~~}
-\def\a{\alpha}
-\def\b{\beta}
-\def\t{\tau}
-
-\def\natt{\m{nat}}
-\def\boolt{\m{bool}}
-\def\unitt{\m{unit}}
-\def\voidt{\m{void}}
-
-\def\unit{\langle \rangle}
-
-\def\tt{\m{true}}
-\def\ff{\m{false}}
-
-\def\prove{\vdash}
-
-\renewcommand\fun[3]{\lambda #1 : #2 . #3}
-\renewcommand\Fun[2]{\Lambda #1 . #2}
-
-\def\typet{\m{type}}
-\renewcommand\type[1]{#1 : \typet}
-
-\renewcommand\allt[2]{\forall #1.#2}
-\renewcommand\prodt[2]{#1 \times #2}
-\renewcommand\pair[2]{\langle #1, #2 \rangle}
-\renewcommand\App[2]{#1[#2]}
-\renewcommand\subst[3]{[#1 / #2] #3}
-
-\renewcommand\existst[2]{\exists #1.#2}
-\renewcommand\pack[4]{\m{pack}~[#1,#2]~\m{as}~\exists #3.#4}
-\renewcommand\open[4]{\m{open}~[#1,#2] = #3~\m{in}~#4}
-
-\def\defeq{\overset{def}{=}}
-$$
-&lt;/div&gt;
-
-&lt;h1 id=&quot;polymorphism-continued&quot;&gt;Polymorphism (continued)&lt;/h1&gt;
-
-&lt;h2 id=&quot;data-asbstraction--existential-types&quot;&gt;Data asbstraction / existential types&lt;/h2&gt;
-
-&lt;p&gt;An existential type is of the form&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\existst{\a}{\t}&lt;/script&gt;
-
-&lt;p&gt;This forces us to be parametric on &lt;script type=&quot;math/tex&quot;&gt;\a&lt;/script&gt;. We introduce&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\pack{\t}{e}{\a}{\t&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\open{\a}{x}{e}{e&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx\prove \type{\t} \qquad \ctx\prove e : \subst{\t}{\a}{\t&#39;} \qquad \ctx,\type{\a} \prove \type{\t&#39;}}
-{\ctx \prove \pack{\t}{e}{\a}{\t&#39;} : \existst{\a}{\t&#39;}}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac
-{\ctx \prove e_1 : \existst{\a}{\t} \qquad \ctx, \type{\a}, x : \t \prove e_2 : \t&#39; \qquad \ctx \prove \type{\t&#39;}}
-{\ctx \prove \open{\a}{x}{e_1}{e_2} : \t&#39;}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;{\tt
-sig \\
-  type~\tau \\
-  val~init : \tau \\
-  val~flip : t \to \tau \\
-  val~out : t \to \m{bool} \\
-end
-}&lt;/script&gt;
-
-&lt;p&gt;We actually don’t need explicit existential types, because we can implement them in terms of universal types.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-\existst{\a}{\t} &amp; \defeq \allt{\b}{(\allt{\a}{\t \to \b}) \to \b} \\
-\pack{\t}{e}{\a}{\t&#39;} &amp; \defeq \Fun{\b}{\fun{f}{(\allt{\a}{\t&#39; \to \b})}{f~\t~e}} \\
-\open{\a}{x}{e_1}{e_2} &amp; \defeq \App{e_1}{\t&#39;}(\Fun{\a}{\fun{x}{\tau}{e_2}})
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;h1 id=&quot;representation-independence--abstraction-theoremhttpwwwandrewcmueducourse15-312notesmar-20pdf&quot;&gt;&lt;a href=&quot;http://www.andrew.cmu.edu/course/15-312/notes/mar-20.pdf&quot;&gt;Representation Independence / Abstraction Theorem&lt;/a&gt;&lt;/h1&gt;
-
-&lt;h2 id=&quot;equivalence&quot;&gt;Equivalence&lt;/h2&gt;
-
-&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;-equivalence is when two terms are exactly the same, except for variable names. This is the strictest form of equivalence.&lt;/p&gt;
-
-&lt;p&gt;Trivial equivalence is when everything is said to be equivalent. This is pretty useless.&lt;/p&gt;
-
-&lt;p&gt;We will discuss &lt;em&gt;contexual&lt;/em&gt; and &lt;em&gt;logical&lt;/em&gt; equivalence, which are the same.&lt;/p&gt;
-
-&lt;p&gt;Two terms are contextually equivalent if any program we embed those terms into cannot tell the difference between the two terms. This is pretty well motivated–we want to know if this is the case all the time. However, it’s hard to work with, since in theory, to show it, we have to check all possible inputs.&lt;/p&gt;
-
-&lt;p&gt;Contexual: &lt;script type=&quot;math/tex&quot;&gt;e \cong e&#39; : \t&lt;/script&gt;&lt;br /&gt;
-Logical: &lt;script type=&quot;math/tex&quot;&gt;e \sim e&#39; : \t&lt;/script&gt;&lt;/p&gt;
-
-&lt;p&gt;(Special case of) Reynold’s Abstraction Theorem: If &lt;script type=&quot;math/tex&quot;&gt;\prove e : \t&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;e \sim e : \t&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Logical relation:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{align}
-e \sim e&#39; : \boolt &amp; \iff (e \mapsto^* \tt \wedge e&#39; \mapsto^* \tt) \vee (e \mapsto^* \ff \wedge e&#39; \mapsto^* \ff) \\
-e \sim e&#39; : \unitt &amp; \iff \m{yes} \\
-e \sim e&#39; : \natt &amp; \iff \exists n . e \mapsto^* \bar{n} \wedge e&#39; \mapsto \bar{n} \\
-e \sim e&#39; : \t_1 \to \t_2 &amp; \iff \forall v, v&#39; . \m{if}~v \sim v&#39; : \t_1, \m{then}~e~v\sim e&#39;~v&#39; : \t_2 \\
-e \sim e&#39; : \t_1 \times \t_2 &amp; \iff e \cdot l \sim e&#39; \cdot l : \tau_1 \vee e \cdot r \sim e&#39; \cdot r : \t_2 \\
-e \sim e&#39; : \allt{\a}{\t} &amp; \iff \forall \t_1, \t_2 . \forall R : \t_1 \leftrightarrow \t_2 . \App{e}{\t_1} \sim \App{e&#39;}{\t_2} : \subst{R}{\a}{\t} \\
-e \sim e&#39; : R &amp; \iff e~R~e&#39;
-\end{align} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;We’re using quasi-types:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;q ::= \boolt \mid \natt \mid \unitt \mid q \to q \mid q \times q \mid \allt{\a}{q} \mid R&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;R \subseteq \{ e\mid e : \t_1 \} \times \{ e \mid e : \t_2 \}&lt;/script&gt;
-
-&lt;p&gt;such that &lt;script type=&quot;math/tex&quot;&gt;R&lt;/script&gt; is closed under equivalence. Thus, reflexivity is no longer obvious, which makes the abstraction theorem so useful.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;M_1 = \pack{\boolt}{\pair{\ff}{\pair{\natt}{\lambda x . x}}}{\a}{\a \times (\a \to \a) \times \a \to \boolt}&lt;/script&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;M_2 = \pack{\natt}{\pair{\bar{0}}{\pair{\m{succ}}{\m{odd?}}}}{\a}{\a \times (\a \to \a) \times \a \to \boolt}&lt;/script&gt;
-
-&lt;p&gt;We can prove that &lt;script type=&quot;math/tex&quot;&gt;M_1 \sim M_2 : \existst{\a}{\a \times (\a \to \a) \times \a \to \boolt}.&lt;/script&gt;&lt;/p&gt;
-</description>
-        <pubDate>Tue, 24 Mar 2015 13:27:21 -0400</pubDate>
-        <link>http://www.tomshen.me/notes/cmu/15312/2015/03/24/</link>
-        <guid isPermaLink="true">http://www.tomshen.me/notes/cmu/15312/2015/03/24/</guid>
         
         
         <category>cmu</category>

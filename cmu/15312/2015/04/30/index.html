@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>15-312 Lecture 28: Higher-order type constructors</title>
+  <meta name="description" content="$$\renewcommand{\m}[1]{\textsf{#1}}">
+
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:400,400italic|Lora:400,700,400italic,700italic">
+  <link rel="stylesheet" href="/notes/css/main.css">
+  <link rel="canonical" href="http://www.tomshen.me/notes/cmu/15312/2015/04/30/">
+  <link rel="alternate" type="application/rss+xml" title="Notes" href="http://www.tomshen.me/notes/feed.xml" />
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'] ]
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/notes/">Notes</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/notes/cmu/15312/">15-312</a>
+          
+        
+          
+          <a class="page-link" href="/notes/cmu/76221/">76-221</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">15-312 Lecture 28: Higher-order type constructors</h1>
+    <p class="post-meta">Apr 30, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <div style="display:none">
+$$
+\renewcommand{\m}[1]{\textsf{#1}}
+
+\renewcommand{\type}{\m{type}}
+\renewcommand{\natt}{\m{nat}}
+\renewcommand{\intt}{\m{int}}
+
+\renewcommand{\pair}[2]{\langle #1, #2 \rangle}
+\renewcommand{\ref}[1]{#1~\m{ref}}
+$$
+</div>
+
+<blockquote>
+  <p>The final exam will be cumulative, including all lectures. There will be more of a focus on material covered in the second half of the course. Open book, open notes, but “closed” electronics.</p>
+</blockquote>
+
+<p>We’re going to be discussing <em>higher-order type constructors,</em> also known as <em>higher kinds.</em> The associated language is $F_\omega$.</p>
+
+<p>Recall System-F:</p>
+
+<script type="math/tex; mode=display">\tau ::= \alpha \mid \forall \alpha . \tau \mid \tau \to \tau</script>
+
+<script type="math/tex; mode=display">e ::= x \mid \Lambda \alpha . e \mid e[\tau] \mid \lambda x : \tau . e \mid e~e</script>
+
+<p>We’ve said that $\tau : \m{type}$. But is $\type$ a type? If it is, then we can ask if $\type : \type$, but this is a really bad question. $\type$ can’t be a type, but it also can’t not be a type. How do we resolve this?</p>
+
+<p>If we want to have computations that produce types, then we want these computations have types as well. We call these types of types <em>kinds</em>.</p>
+
+<p>Currently, our only kind is $\type$. We replace $\tau$ with $c$, which stands for <em>type constructor</em> (or just <em>constructor</em>).</p>
+
+<script type="math/tex; mode=display">k ::= \type</script>
+
+<script type="math/tex; mode=display">\tau ::= \alpha \mid \forall \alpha : k .c \mid c \to c</script>
+
+<script type="math/tex; mode=display">e ::=  x \mid \Lambda \alpha : k . e \mid e[c] \mid \lambda x : c . e \mid e~e </script>
+
+<p>We have two types (<em>types types types types types</em>) of judgments: $e : c$ and $c : k$.</p>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma, \alpha : k \vdash e : c
+}{
+    \Gamma \vdash \Lambda \alpha : k . e : \forall \alpha : k . c
+}</script>
+
+<p><em>[Missing quite a few judgments]</em></p>
+
+<p>We add a new type:</p>
+
+<script type="math/tex; mode=display">k ::= \type \mid k \to k</script>
+
+<script type="math/tex; mode=display">c ::= \cdots \mid \lambda \alpha : k . c \mid c~c</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma, \alpha : k \vdash c : k'
+}{
+    \Gamma \vdash \lambda \alpha : k . c : k \to k'
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c_1 : k \to k' \qquad
+    \Gamma \vdash c_2 : k
+}{
+    \Gamma \vdash c_1~c_2 : k'
+}</script>
+
+<p>Note that distinction between $\lambda \alpha : k . c$ and $\lambda \alpha : k . c$. The former is <em>not</em> a type, and the latter is a <em>type</em>, with members.</p>
+
+<p>Standard ML doesn’t have type constructors (Haskell does!), but you can simulate them with functors:</p>
+
+<div class="highlight"><pre><code class="language-sml" data-lang="sml"><span class="kr">functor</span> <span class="nn">Foo</span> <span class="p">(</span><span class="n">X</span> <span class="p">:</span> <span class="kr">sig</span> <span class="kr">type</span> <span class="kt">t</span> <span class="kr">val</span> <span class="nv">x</span> <span class="p">:</span> <span class="n">int</span> <span class="n">t</span> <span class="kr">end</span><span class="p">)</span>
+<span class="kr">struct</span>
+    <span class="kr">type</span> <span class="kt">u</span> <span class="p">=</span> <span class="n">t</span> <span class="n">*</span> <span class="n">t</span>
+    <span class="kr">val</span> <span class="nv">y</span> <span class="p">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="kr">end</span> <span class="p">:</span> <span class="kr">sig</span> <span class="kr">type</span> <span class="kt">u</span> <span class="kr">val</span> <span class="nv">y</span> <span class="p">:</span> <span class="n">u</span> <span class="kr">end</span></code></pre></div>
+
+<p>$\m{Foo} : \forall t : \type . t~\intt \to \exists u : \type \to \type. u~\intt$</p>
+
+<p>As an example, we’ll define a general increment function that will incrememnt anything that looks like a counter:</p>
+
+<script type="math/tex; mode=display">\m{counter} = \exists \alpha . \alpha \times ((\alpha \to \alpha) \times (\alpha \to \natt))</script>
+
+<script type="math/tex; mode=display">\m{genInc} : \forall \alpha . (\alpha \to \m{counter}) \to \alpha \to \alpha</script>
+
+<p>Without higher order type constructors, we can’t write this:</p>
+
+<script type="math/tex; mode=display">\m{genInc} : \Lambda \alpha . \lambda f : \alpha \to \m{counter} . \lambda x : \alpha . ??</script>
+
+<p>We define a counter interface:</p>
+
+<script type="math/tex; mode=display">\m{counterI} : \type \to \type = \lambda \alpha : \type . (\alpha \to \alpha) \times (\alpha \to \natt)</script>
+
+<script type="math/tex; mode=display">\m{obj} : (\type \to \type) \to \type = \lambda \varphi : \type \to \type . \exists \alpha . \alpha \times \varphi~\alpha</script>
+
+<p>Note that $\m{counter} \cong \m{obj}~\m{counterI}$.</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align}
+\m{genInc} : & \forall \varphi : \type \to \type . (\forall \alpha . \varphi~\alpha \to \m{counterI}~\alpha) \to \m{obj}~\varphi \to \m{obj}~\varphi \\
+= & \Lambda \varphi : \type \to \type . (\forall \alpha . \varphi~\alpha \to \m{counterI}~\alpha) . \lambda x : \m{obj}~\varphi . \\
+& \m{unpack}~[\alpha,y] = x \m{ in } \m{pack}~[\alpha, \pair{f[\alpha](y \cdot r) \cdot l~(y \cdot l)}{y \cdot r}] \\
+& \m{ as } \exists \alpha . \alpha \times \varphi~\alpha
+\end{align} %]]></script>
+
+<p>Consider $\m{id} : \forall \varphi : \type \to \type . \varphi~\intt \to \varphi~\intt$.</p>
+
+<p>But when we try to apply this:</p>
+
+<script type="math/tex; mode=display">\m{id}[\lambda \alpha : \type . \alpha]~12</script>
+
+<p>We end up with <script type="math/tex">(\lambda \alpha . \alpha)~\intt \to (\lambda \alpha . \alpha)~\intt</script>. However, <script type="math/tex">(\lambda \alpha . \alpha)~\intt \neq \intt</script>. Though these types are equivalent, they are not identical, and thus we don’t recognize this in our type theory. We fix this with the <em>equivalence rule</em>:</p>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash e : \tau \qquad
+    \Gamma \vdash \tau \equiv \tau' : \type
+}{
+    \Gamma \vdash e : \tau'
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c : k
+}{
+    \Gamma \vdash c \equiv c : k
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c \equiv c' : k
+}{
+    \Gamma \vdash c' \equiv c : k
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c_1 \equiv c_2 : k \qquad
+    \Gamma \vdash c_2 \equiv c_3 : k
+} {
+    \Gamma \vdash c_1 \equiv c_3 : k
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c' : k_1 \qquad
+    \Gamma, \alpha : k \vdash c : k_2
+}{
+    \Gamma \vdash (\lambda \alpha : k_1 . c) c' \equiv [c' / \alpha]~c : k_2
+}(\beta)</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c_1 \equiv c_1 : \type \qquad
+    \Gamma \vdash e_2 \equiv e_2' : \type
+}{
+    \Gamma \vdash c_1 \to c_2 \equiv c_1' \to c_2' : \type
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma \vdash c_1 \equiv c_1' : k \to k' \qquad
+    \Gamma \vdash c_2 \equiv _2' : k
+}{
+    \Gamma \vdash c_1~c_2 \equiv c_1'~c_2' : k'
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma, \alpha : k \vdash c \equiv c' : k'
+}{
+    \Gamma \vdash \alpha : k . c \equiv \lambda \alpha : k . c' : k \to k'
+}</script>
+
+<script type="math/tex; mode=display">\frac{
+    \Gamma, \alpha : k \vdash c~\alpha \equiv c'~\alpha : k_2
+}{
+    \Gamma \vdash c \equiv c' : k_1 \to k_2
+}(\m{extensionality})</script>
+
+<p>(must hold for all $\alpha$)</p>
+
+<p>The <strong>Church-Rosser Theorem</strong> lets us prove normal forms with these equivalence rules [?].</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Notes</li>
+          <li><a href="mailto:tom@shen.io">tom@shen.io</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/tomshen">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">tomshen</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/tomshen">
+              <span class="icon  icon--twitter">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+                </svg>
+              </span>
+
+              <span class="username">tomshen</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">Notes on classes at CMU.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
